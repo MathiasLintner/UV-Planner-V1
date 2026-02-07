@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "project_name": "Installationsverteiler-Lernsoftware",
+    "version": "1.0",
+    "language": "de",
+    "generated_date": "2025-11-28"
+  },
+  "system_overview": {
+    "type": "web_applikation",
+    "deployment": "serverless_optional / static_hosting",
+    "target_clients": "Desktop-Browser (kein Touch erforderlich)",
+    "storage_format_projects": "application/json",
+    "export": {
+      "pdf": {
+        "type": "static_layout",
+        "include_annotations": true,
+        "include_component_labels": true
+      }
+    }
+  },
+  "users_and_roles": {
+    "roles": [
+      {
+        "id": "lehrling",
+        "capabilities": [
+          "projekt_erstellen",
+          "projekt_bearbeiten",
+          "projekt_speichern",
+          "projekt_öffnen",
+          "einreichung_absenden",
+          "eigene_kommentare_ansehen"
+        ]
+      },
+      {
+        "id": "ausbildner",
+        "capabilities": [
+          "alle_projekte_ansehen",
+          "projekte_kommentieren",
+          "aufgaben_erstellen",
+          "anforderungen_festlegen_für_aufgaben"
+        ]
+      }
+    ],
+    "role_model_notes": "Logging unterscheidet nur nach Rolle; keine feingranulare Audit-Logs gefordert."
+  },
+  "ui_and_interaction": {
+    "grid": {
+      "unit": "1_TE",
+      "units_per_row": 10,
+      "rows_max": 4,
+      "snap_to_grid": true,
+      "auto_place_no_gaps": true
+    },
+    "component_placement": {
+      "drag_and_drop": true,
+      "automatic_snapping": true,
+      "rotation": false,
+      "grouping": false
+    },
+    "visuals": {
+      "color_coding_standard": "IEC_60445_typical_colors",
+      "component_symbol_library": true,
+      "labels_visible_on_hover": true,
+      "optional_labels_on_export": true
+    },
+    "usability": {
+      "keyboard_shortcuts": true,
+      "context_menus": true,
+      "touch_support": false
+    }
+  },
+  "components_library": {
+    "provided_types": [
+      {
+        "category": "LS",
+        "variants": ["B-Charakteristik", "C-Charakteristik", "D-Charakteristik"],
+        "properties": ["type", "nennstrom_A", "kennlinie"]
+      },
+      {
+        "category": "FI",
+        "variants": ["30mA_AC", "30mA_A", "100mA_A"],
+        "properties": ["type", "nennfehlerstrom_mA", "polzahl"]
+      },
+      {
+        "category": "SPD",
+        "variants": ["Typ1", "Typ2", "Typ3"],
+        "properties": ["type", "u0_kV", "i_n_kA"]
+      },
+      {
+        "category": "Klemme",
+        "variants": ["Einschraub", "Feder"],
+        "properties": ["type", "max_querschnitt_mm2"]
+      },
+      {
+        "category": "Verbraucher",
+        "variants": ["Licht", "Steckdose", "Motor"],
+        "properties": ["type", "leistung_W"]
+      }
+    ],
+    "default_objects_available": true,
+    "editable_properties": true,
+    "minimal_property_set": ["type", "kenngroessen"]
+  },
+  "wiring_and_electrical_model": {
+    "wire_classes": ["L", "N", "PE"],
+    "wire_properties": ["leiterquerschnitt_mm2", "leitungslänge_m", "leitungswiderstand_ohm_per_m"],
+    "default_line_resistance_ohm_per_m": 0,
+    "calculations": {
+      "power_to_current": "I = P / U (U default 230V, konfigurierbar)",
+      "loop_impedance": "vereinfachtes_modell, nutzbar wenn Leiterquerschnitt und Länge angegeben",
+      "rounding_rules": "2_nachkommastellen"
+    },
+    "validation": {
+      "plausibility_checks": true,
+      "checks": [
+        "ungerade_verbindungen",
+        "unvollständige_kreise",
+        "mehrfachbelegung_einer_te_einheit",
+        "kennwerte_fehlend"
+      ],
+      "error_reporting": {
+        "visual_marker": true,
+        "fehlermeldung_fenster": "kleines_popup_like_online_form",
+        "on_invalid_input": "eingabe_ignorieren_und_feld_leeren"
+      }
+    }
+  },
+  "tasks_and_workflow": {
+    "task_model": {
+      "erstellt_von": "ausbildner",
+      "aufgaben_inhalt": "vorgaben_component_types_und_verdrahtung",
+      "versioning": false,
+      "submission_workflow": [
+        "lehrling_loest_aufgabe",
+        "lehrling_einreichen",
+        "ausbildner_bewertet_kommentiert"
+      ]
+    },
+    "task_requirements": {
+      "enforce_component_types": true,
+      "enforce_wiring_spec": true
+    }
+  },
+  "project_storage_and_format": {
+    "file_structure": {
+      "metadata": ["title", "author_role", "created_at", "modified_at"],
+      "layout": {
+        "rows": 4,
+        "units_per_row": 10,
+        "placed_components": [
+          {
+            "id": "uuid",
+            "type": "LS",
+            "variant": "B-Charakteristik",
+            "position": { "row": 1, "unit_start": 2, "unit_span": 1 },
+            "properties": { "nennstrom_A": 16 }
+          }
+        ],
+        "wires": [
+          {
+            "id": "uuid",
+            "from_component_id": "uuid",
+            "to_component_id": "uuid",
+            "wire_type": "L",
+            "properties": { "leiterquerschnitt_mm2": 1.5, "laenge_m": 2 }
+          }
+        ]
+      },
+      "calculations": { "currents": [], "loop_impedances": [] },
+      "comments": []
+    },
+    "serialization": "UTF-8_JSON",
+    "max_file_size_recommendation": "<= 5MB"
+  },
+  "export_pdf": {
+    "layout": {
+      "scale": "fit_width",
+      "include_grid_overlay": false,
+      "include_labels": true,
+      "include_validation_summary": true
+    },
+    "meta_included": ["title", "author_role", "date"]
+  },
+  "logging_and_errors": {
+    "logging_level": "minimal",
+    "logged_fields": ["user_role", "action", "timestamp"],
+    "error_handling": {
+      "user_visible_errors": "kleines_popup",
+      "developer_errors": "console_log_if_available"
+    }
+  },
+  "non_functional_requirements": {
+    "performance": {
+      "target": "flüssig_bis_100_komponenten",
+      "client_memory_budget": "modest (suitable for low-end school-PCs)"
+    },
+    "security": {
+      "basic": "auth_role_based",
+      "sensitive_data": "keine_persönlichen_daten_erforderlich"
+    },
+    "scalability": "nicht_kritisch",
+    "maintainability": {
+      "modular_design": true,
+      "extension_points": ["component_library", "calculation_module"]
+    },
+    "internationalization": {
+      "required": false,
+      "supported_languages": ["de"]
+    }
+  },
+  "constraints_and_limits": {
+    "max_components_per_project": 200,
+    "max_wires": 400,
+    "rows": 4,
+    "units_per_row": 10
+  },
+  "api_and_integration": {
+    "internal_api": {
+      "project_crud": "/api/v1/projects",
+      "export_pdf": "/api/v1/projects/{id}/export/pdf",
+      "user_auth": "/api/v1/auth"
+    },
+    "external_integrations": {
+      "required": false,
+      "recommendation": "optional_import_export_json_for_backup"
+    }
+  }
+}

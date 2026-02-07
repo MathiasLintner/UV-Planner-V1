@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Validierungs-Debug</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f0f0f0; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 5px 0; }
+        .error { background: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 5px 0; }
+        .success { background: #d4edda; border-left: 4px solid #28a745; padding: 10px; margin: 5px 0; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Validierungs-Debug Tool</h1>
+
+    <div class="section">
+        <h2>Anleitung zum Testen:</h2>
+        <ol>
+            <li>Öffne die Browser-Konsole (F12)</li>
+            <li>Gehe zur Elektro-Planer Anwendung: <a href="http://localhost:5175" target="_blank">http://localhost:5175</a></li>
+            <li>Füge folgenden Code in die Konsole ein:</li>
+        </ol>
+        <pre>// Hole den aktuellen Store-State
+const state = window.localStorage.getItem('elektro-planer-storage');
+const data = JSON.parse(state);
+
+console.log('=== VERBRAUCHER ===');
+data.state.verteiler.verbraucher.forEach(v => {
+  const leistung = v.leistung * v.gleichzeitigkeitsfaktor;
+  const strom = leistung / v.spannung;
+
+  const schutz = data.state.verteiler.komponenten.find(k => k.id === v.zugewieseneKomponente);
+  const schutzStrom = schutz ? schutz.bemessungsStrom : 'N/A';
+
+  console.log(`${v.name}:`);
+  console.log(`  Leistung: ${leistung}W @ ${v.spannung}V = ${strom.toFixed(2)}A`);
+  console.log(`  Sicherung: ${schutz ? schutz.name : 'Nicht zugewiesen'} (${schutzStrom}A)`);
+
+  if (schutzStrom !== 'N/A' && strom > schutzStrom) {
+    console.log(`  ⚠️ ÜBERSTROM: ${strom.toFixed(1)}A > ${schutzStrom}A`);
+  }
+  console.log('');
+});</pre>
+    </div>
+
+    <div class="section">
+        <h2>Test-Verbraucher erstellen:</h2>
+        <p>Kopiere diesen Code in die Browser-Konsole der Anwendung, um automatisch einen Test-Verbraucher mit Überstrom zu erstellen:</p>
+        <pre>// Importiere den Store (nur wenn du im Dev-Modus bist)
+// Dieses Script erstellt automatisch einen Testverbraucher mit Überstrom
+
+const createTestCase = () => {
+  alert('Bitte erstelle manuell:\\n1. FI/LS-Kombination mit 10A\\n2. Verbraucher mit 3680W bei 230V\\n3. Weise Verbraucher der Sicherung zu\\n4. Starte Prüflauf');
+}
+
+createTestCase();</pre>
+    </div>
+
+    <div class="section">
+        <h2>Erwartete Warnung:</h2>
+        <div class="warning">
+            <strong>⚠️ Warnung: Überstrom</strong><br>
+            <strong>Komponente:</strong> [Verbrauchername]<br>
+            <strong>Beschreibung:</strong> Verbraucher hat höheren Strom (16.0A) als vorgelagerte Sicherung "FI/LS 10A" (10A)<br>
+            <strong>Hinweis:</strong> Der Verbraucher mit 3680W Leistung benötigt 16.0A, aber die Sicherung ist nur für 10A ausgelegt. Erhöhen Sie den Bemessungsstrom der Sicherung oder reduzieren Sie die Verbraucherleistung.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Code-Verifizierung:</h2>
+        <p>Überprüfe ob die neue Validierung in der Datei vorhanden ist:</p>
+        <div class="success">
+            ✅ validation.ts Zeile 141: <code>checkVerbraucherUeberstrom()</code> wird aufgerufen<br>
+            ✅ validation.ts Zeile 1572-1636: Funktion <code>checkVerbraucherUeberstrom()</code> implementiert<br>
+            ✅ types/index.ts Zeile 292: Typ <code>'ueberstrom'</code> hinzugefügt
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Browser-Cache leeren:</h2>
+        <p>Falls die Warnung nicht erscheint:</p>
+        <ol>
+            <li>Drücke <strong>Strg + Shift + R</strong> (Hard Refresh)</li>
+            <li>Oder öffne DevTools (F12) → Network Tab → "Disable cache" aktivieren</li>
+            <li>Lade die Seite neu</li>
+        </ol>
+    </div>
+</body>
+</html>

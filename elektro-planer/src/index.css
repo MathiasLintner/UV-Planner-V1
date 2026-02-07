@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+}
+
+.wire-l1 { stroke: #8B4513; }
+.wire-l2 { stroke: #000000; }
+.wire-l3 { stroke: #808080; }
+.wire-n { stroke: #3B82F6; }
+.wire-pe { stroke: #22C55E; }
+
+.hutschiene {
+  background: linear-gradient(to bottom, #d1d5db, #9ca3af, #d1d5db);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.component-slot {
+  transition: all 0.2s ease;
+}
+
+.component-slot:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.component-slot.drag-over {
+  background-color: rgba(59, 130, 246, 0.2);
+  border: 2px dashed #3b82f6;
+}
+
+.error-highlight {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5);
+  animation: pulse-error 1.5s infinite;
+}
+
+@keyframes pulse-error {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.3); }
+}
+
+.connection-point {
+  transition: all 0.15s ease;
+}
+
+.connection-point:hover {
+  transform: scale(1.3);
+  filter: brightness(1.2);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

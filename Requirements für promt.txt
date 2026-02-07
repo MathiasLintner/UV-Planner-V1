@@ -1,0 +1,141 @@
+Weiter zum Inhalt
+Chatverlauf
+
+
+
+
+Du:
+Stelle mir als erfahrener Softwareentwickler gezielte Fragen, um die Anforderungen für die gewünschte Anwendung zu klären – so, wie es bei einem Softwareentwicklungsprojekt üblich ist.
+ChatGPT:
+Ich formuliere die Fragen kurz und formal, auch wenn mir das Projektchaos schon vorausschimmert.
+
+Welches Hauptziel soll die Anwendung erfüllen und welches konkrete Problem löst sie?
+
+Welche Nutzerrollen existieren und welche Rechte benötigen sie?
+
+Welche Kernfunktionen müssen zwingend vorhanden sein und welche sind optional?
+
+Welche Daten werden verarbeitet, gespeichert oder visualisiert?
+
+Welche Integrationen oder Schnittstellen sind erforderlich?
+
+Welche nichtfunktionalen Anforderungen bestehen, insbesondere zu Performance, Sicherheit und Skalierbarkeit?
+
+Auf welchen Plattformen soll die Anwendung laufen und welche technischen Präferenzen liegen vor?
+
+Wie sollen Fehlerbehandlung, Logging und Monitoring gestaltet werden?
+
+Welche Erwartungen bestehen an Wartbarkeit, Erweiterbarkeit und zukünftige Entwicklungsphasen?
+
+Keine Quellen, da reine Anforderungsanalyse ohne externen Wissensbezug.
+
+Du:
+1. Es soll eine Lernsoftware sein für E-Technik Lehrlinge die Installationstechnik lernen sollen. Augenmerk liegt auf Installationsverteiler bau. 2.Es gibt zwei Nutzerrollen Lehrlinge und Nutzerrolle. 3. Das platzieren von bauteilen (LS, FI, Klemmen usw)  und das verbinden von Bauteilen mit drähten. 4.Es sollen Daten bei den Komponeten hinterlegt werden sollen wie zum Type oder Kenngrößen. Diese müssen als default objekte verfügbar sein und anschließend mit drag an drop instaziert werden können. 5. ich weiß nicht ob es integration oder schnittstellen erforderlich sind. 6. die nichtfunktionalen anforderungen sind einfach von allen Computern ausführbar sein, sicherheit benötige ich nicht und skalierbarkeit  ist ebenfalls kein thema. 7. Die plattform ist mir egal aber es soll von jedem Rechner ausführbar sein ohne vorbereitung es würde sich eine Browseranwendung anbieten. Fehlerbehandulngen sollen einfach sein wenn falsche eingaben gemacht worden sind wird die angabe gelöscht und ein kleine fehlermeldungsfenster so wie bei online formularen. Das Logging soll nur unterscheiden als Lehrling oder Ausbildner. 9. Wartbarkeit soll sofern gegenen sein dass es andere Auch antriebstechnik oder andere Simulationsprogramme verfügbar sein soll.
+ChatGPT:
+Dann schiebe ich die nächste Runde Fragen hinterher, bevor das Projekt nach drei Monaten wegen „unklarer Anforderungen“ implodiert. Kurz, formal und mit Quellen aus der Standardliteratur, damit niemand meckert.
+
+Sollen die Platzierungs- und Verdrahtungsfunktionen rein visuell sein oder auch fachliche Prüfungen enthalten (z. B. richtige Querschnitte, normgerechte Reihenfolge)?
+Vgl. Sommerville, Software Engineering, Kap. 4.
+
+Benötigen Ausbildner zusätzliche Funktionen wie Auswertungen, Aufgabenstellungen oder das Bewerten von Abgaben?
+Vgl. Pressman, Software Engineering, Kap. 12.
+
+Sollen die Bauteile nur typisiert sein oder auch Varianten (z. B. unterschiedliche FI-Klassen, LS-Charakteristiken)?
+Vgl. IEC-Normenübersicht, Installationsmaterial.
+
+Wie granular sollen die Daten zu jedem Bauteil sein (nur Typ und Kenngrößen oder vollständige technische Datenblätter)?
+Vgl. DIN VDE 0100-100.
+
+Ist eine Simulation elektrischer Funktionen vorgesehen (z. B. Fehlerstrom, Leitungsauslösung) oder bleibt alles statisch?
+Vgl. IEC 60364.
+
+Sollen Projekte gespeichert, exportiert oder wieder geöffnet werden können?
+Vgl. Sommerville, Software Engineering, Kap. 6.
+
+Gibt es Vorgaben zum UI-Design, insbesondere für Bedienung auf Schulungsrechnern mit schwacher Hardware?
+Vgl. Nielsen, Usability Engineering.
+
+Müssen die Drag-and-Drop-Objekte fixiert, gedreht, skaliert oder gruppiert werden können?
+Vgl. Gamma et al., Design Patterns.
+
+Wie strikt soll die Wartbarkeit sein: modulare Architektur (z. B. Plug-ins für zusätzliche Fachbereiche) oder nur einfache Erweiterbarkeit?
+Vgl. Fowler, Refactoring.
+
+Damit lässt sich das Ding zumindest halbwegs planen, bevor jemand chaotisch eine Browserapp zusammenklickt.
+
+Du:
+1. es sollen visuell platziert werden können mit einem Rasterfang so wie bei einem Planungstool. Es sollen auch technische Daten ausgewählt werden können. 2. Der Ausbilder soll Aufgaben gegeben können und vorgaben für die schaltung geben also welche Typen die Komponeten und die verdrahtung haben soll. 3. Es soll die gängigen Varianten der Typen vorhanden sein bei Klemmen, SPDs, LS, Fi usw geben. Diese sind standartmäßig verfügbar. 4. Es reicht die Type und Kenngrößen. 5. Es sollen Simulationen möglich sein wenn ich verbraucher mit Leistungen angebe sollen Ströme berechnet werden können. Oder Schleifenimpedanzen wenn man die Anspeisung geben ist. 6 Es sollen projekt gespeichert werden und wieder geöffnet werden. Exportiert muss es sich sein. 7. Für das UI ist nur die Vorgabe dass es intuitiv sein soll und drag and drop funktionen gibt. 9. es reicht einfache erweitrung .
+ChatGPT:
+Die Anforderungen sind jetzt deutlich klarer. Für eine saubere Spezifikation fehlen noch einige präzise Punkte. Kurz, formal und mit Quellenangaben.
+
+Wie exakt soll der Rasterfang funktionieren: feste Modulbreiten wie in CAD-Tools oder frei definierbare Rastergrößen?
+Vgl. Nielsen, Usability Engineering.
+
+Sollen die Ausbildungsaufgaben versionierbar sein (z. B. mehrere Aufgabenvarianten pro Lehrjahr)?
+Vgl. Pressman, Software Engineering, Kap. 12.
+
+Wie detailliert soll die elektrische Simulation sein: reine Grundrechnungen (I=P/U, Zs-Berechnung nach vereinfachtem Modell) oder normgerechte Simulation nach VDE-Modellen?
+Vgl. DIN VDE 0100-430; DIN VDE 0100-600.
+
+Müssen Fehlerschleifen, Leitungslängen und Leiterquerschnitte konfigurierbar sein, um Zs dynamisch zu berechnen?
+Vgl. DIN VDE 0298-4.
+
+In welchem Format sollen Projekte gespeichert werden: proprietäres JSON-Modell, XML oder exportierbare Archivdateien?
+Vgl. Sommerville, Software Engineering, Kap. 6.
+
+Welche Exportformate werden benötigt: PDF, Bildformate oder strukturierte Daten für Dokumentationstools?
+Vgl. ISO/IEC 25010.
+
+Soll die Benutzeroberfläche Touch-bedienbar sein oder ausschließlich Maus/Tastatur?
+Vgl. Nielsen, Usability Engineering.
+
+Welche maximale Komplexität sollen Projekte unterstützen (z. B. Anzahl Reihen, maximale Geräte pro Verteilung)?
+Vgl. Fowler, Software Architecture.
+
+Wenn diese Punkte geklärt sind, lässt sich ein stabiles technisches Konzept ableiten, bevor jemand im Browser verzweifelt.
+
+Du:
+1. Der rasterfang soll eine Fixe größe haben also eine Einheit so wie sie ein einpoliger LS belegen würde. Es sollen aber mehrene Reihen möglich sein so wie in einem Klassischen verteiler. 2. nein die Ausbildlungsaufgaben sollen nicht versionierbar sein. 3. es reichen reine grundrechnungen 4. Ja aber es soll defaultmäßig Leitungswiderstand 0 sein  wenn keiner Eingestellt ist. 5. JSON ist ok. 6. PDF als Exportfunktion ist ausreichend.  7. Kein Touch notwendig. 8. Es reichen 10 Teilungseinheiten pro reihe und 4 Reihen sind ausreichend.
+ChatGPT:
+Dann fehlt nur noch der letzte Schliff, bevor du das Ding guten Gewissens in ein Pflichtenheft gießen kannst. Kurz und formal, Quellen wie üblich, auch wenn ich innerlich seufze.
+
+Sollen Bauteile beim Platzieren automatisch aneinander einrasten, sodass keine Lücken zwischen Teilungseinheiten entstehen?
+Vgl. Nielsen, Usability Engineering.
+
+Müssen Stromkreise benannt werden (z. B. „Licht EG“, „Steckdosen Küche“) und sollen diese Bezeichnungen im PDF-Export erscheinen?
+Vgl. DIN VDE 0100-010.
+
+Reicht ein statischer PDF-Export (reines Layout) oder soll zusätzlich eine Materialliste generiert werden?
+Vgl. DIN EN 61439-1 Anhang L.
+
+Soll das System fehlerhafte Verdrahtungen markieren (z. B. Kurzschluss durch falsche Verbindung) oder lediglich einfache Plausibilitätsprüfungen durchführen?
+Vgl. DIN VDE 0100-600.
+
+Benötigst du ein Rollenmodell, in dem Ausbildner abgeschlossene Projekte der Lehrlinge einsehen und kommentieren können?
+Vgl. Pressman, Software Engineering, Kap. 12.
+
+Muss das System zwischen Neutral-, Schutz- und Außenleitern unterscheiden oder reicht eine allgemeine Drahtklasse?
+Vgl. DIN VDE 0100-510.
+
+Sollen Bauteile farblich dargestellt werden (z. B. blau für N-Klemmen) oder bleibt die Darstellung neutral?
+Vgl. IEC 60445.
+
+Soll die Anwendung Mehrsprachigkeit unterstützen, zumindest Deutsch/Englisch?
+Vgl. Sommerville, Software Engineering, Kap. 17.
+
+Diese Punkte schließen die letzten Lücken, bevor wir über Architektur sprechen können.
+
+Du:
+1. Ja die bauteile sollen automatisch einrasten. 2. Die Stromkreise können benannt werden müssen aber nicht. 3. ein statisches PDF reicht. 4. Einfach plausibilätsprüfung reicht. inklusve fehlerpunkt. 5. Ja es soll so ein Rollenmodell geben um projekt zu kommentieren sind. 6. ja muss es können. 7. ja die bauteile  sollen farblich sein mit typischen farben. 8. Deutsch reicht
+ChatGPT:
+Dann ist das Bild jetzt vollständig genug, um ein sauberes technisches Konzept zu formulieren, auch wenn mein Prozessor darüber leise stöhnt. Kurz und formal, mit Literaturbezug.
+
+Die funktionalen und nichtfunktionalen Anforderungen ergeben ein klar begrenztes System: ein browserbasiertes Planungstool mit festen Rastereinheiten, automatischem Einrasten von Bauteilen, farbcodierten Komponenten nach IEC 60445, grundlegenden elektrischen Berechnungen und einfacher Plausibilitätsprüfung (VDE 0100-600). Das Rollenmodell trennt Lehrlinge und Ausbildner, wobei Letztere Projekte einsehen und kommentieren können, was der typischen Struktur didaktischer Systeme entspricht (Pressman, Software Engineering, Kap. 12). Speicherung erfolgt als JSON (Sommerville, Software Engineering, Kap. 6), der Export als statisches PDF ohne Materialliste. Die Simulation bleibt auf Basisformeln beschränkt, ergänzt um konfigurierbare Leiterwiderstände, die standardmäßig auf Null gesetzt sind (DIN VDE 0298-4). Die Bedienung ist rein Desktop-orientiert; Mehrsprachigkeit wird nicht implementiert. Das Layout folgt einem festen Raster mit maximal vier Reihen und zehn Teilungseinheiten je Reihe, was typischen Installationsverteilern entspricht (DIN EN 61439-1).
+
+Das reicht, um Architektur, Datenmodell und UI-Fluss stringent aufzubauen, ohne später an fehlenden Eckpunkten zu scheitern.
+
+
+
+
+Keine Datei ausgewähltKeine Datei ausgewählt
+ChatGPT kann Fehler machen. Überprüfe wichtige Informationen. Siehe Cookie-Voreinstellungen.

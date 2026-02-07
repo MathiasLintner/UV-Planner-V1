@@ -1,0 +1,5 @@
+Neues To do: 
+
+Wenn die Zuweisung eines Verbrauchers bei einer Klemme aufgehoben wird soll auch das Verbrauchersymbol unter der Klemme wieder verschwinden.
+
+beim Anlegen des Verbrauchers bzw beim nachträglich bearbeiten soll eine Verlegeart hinterlegt werden können. 

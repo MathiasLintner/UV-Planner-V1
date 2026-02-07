@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss init -p)",
+      "Bash(cat:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(dir \"C:\\FH_Programme\\Planungstool E-technik\")",
+      "Bash(dir \"C:\\FH_Programme\\Planungstool E-technik\\elektro-planer\\src\")",
+      "Bash(dir \"C:\\FH_Programme\\Planungstool E-technik\\elektro-planer\\src\\components\" /s)",
+      "Bash(dir \"C:\\FH_Programme\\Planungstool E-technik\\elektro-planer\\src\\components\\verteiler\")",
+      "Bash(dir \"C:\\FH_Programme\\Planungstool E-technik\\elektro-planer\\src\\components\\sidebar\")",
+      "Bash(tree:*)",
+      "Bash(dir:*)",
+      "Bash(node test-ueberstrom.js:*)",
+      "Bash(node test-stromberechnung.js:*)",
+      "Bash(node test-drehfeldcheck.js:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
