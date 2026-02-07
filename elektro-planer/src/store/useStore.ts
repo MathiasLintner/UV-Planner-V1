@@ -77,7 +77,6 @@ interface AppState {
   loadProject: (project: { verteiler: Verteiler }) => void;
   resetProject: () => void;
   resetProjectCustom: (config: { slots: number; schienen: number }) => void;
-  loadTemplate: () => void;
 }
 
 // ==========================================
@@ -489,7 +488,15 @@ export const useStore = create<AppState>()(
 
       // Projekt-Aktionen
       loadProject: (project) => set({
-        verteiler: project.verteiler,
+        verteiler: {
+          ...project.verteiler,
+          // Migration: Füge Standardwerte für neue Felder hinzu, falls sie fehlen
+          verbraucher: project.verteiler.verbraucher.map((v) => ({
+            ...v,
+            verlegeart: v.verlegeart || 'B1',
+            leitermaterial: v.leitermaterial || 'kupfer',
+          })),
+        },
         validationResult: null,
       }),
 
@@ -504,15 +511,6 @@ export const useStore = create<AppState>()(
         ui: initialUIState,
         validationResult: null,
       }),
-
-      loadTemplate: () => {
-        const template = createHausanschlussTemplate();
-        set({
-          verteiler: template,
-          ui: initialUIState,
-          validationResult: null,
-        });
-      },
     }),
     {
       name: 'elektro-planer-storage',
@@ -522,200 +520,5 @@ export const useStore = create<AppState>()(
     }
   )
 );
-
-// ==========================================
-// TEMPLATE: Hausanschluss
-// ==========================================
-
-function createHausanschlussTemplate(): Verteiler {
-  const verteilerId = uuidv4();
-
-  // Komponenten-IDs
-  const nhSicherungId = uuidv4();
-  const zaehlerId = uuidv4();
-  const hauptschalterId = uuidv4();
-  const fiLs1Id = uuidv4();
-  const fiLs2Id = uuidv4();
-  const fiLs3Id = uuidv4();
-  const sammelschieneL1Id = uuidv4();
-  const sammelschieneL2Id = uuidv4();
-  const sammelschieneL3Id = uuidv4();
-  const sammelschieneNId = uuidv4();
-  const sammelschienePEId = uuidv4();
-
-  return {
-    id: verteilerId,
-    name: 'Hausanschluss-Verteiler (Vorlage)',
-    beschreibung: 'Standard Hausanschluss-Setup mit Hauptsicherung, Zähler und FI/LS-Kombinationen',
-    hutschienen: [
-      { id: uuidv4(), index: 0, slots: 24 },
-      { id: uuidv4(), index: 1, slots: 24 },
-      { id: uuidv4(), index: 2, slots: 24 },
-      { id: uuidv4(), index: 3, slots: 24 },
-    ],
-    nennspannung: 400,
-    nennstrom: 63,
-    kurzschlussStrom: 6,
-    komponenten: [
-      // Hutschiene 0: NH-Sicherung + Zähler
-      {
-        id: nhSicherungId,
-        type: 'nh-sicherung',
-        name: 'Hauptsicherung',
-        position: { rail: 0, slot: 0 },
-        teilungseinheiten: 3,
-        bemessungsStrom: 63,
-        groesse: '00',
-        betriebsklasse: 'gG',
-      },
-      {
-        id: zaehlerId,
-        type: 'zaehler',
-        name: 'Zähler',
-        position: { rail: 0, slot: 4 },
-        teilungseinheiten: 8,
-        art: 'elektronisch',
-        phasen: 3,
-      },
-      {
-        id: hauptschalterId,
-        type: 'hauptschalter',
-        name: 'Hauptschalter',
-        position: { rail: 0, slot: 13 },
-        teilungseinheiten: 4,
-        bemessungsStrom: 63,
-        polzahl: 4,
-      },
-
-      // Hutschiene 1: FI/LS-Kombinationen
-      {
-        id: fiLs1Id,
-        type: 'fi-ls-kombi',
-        name: 'FI/LS Licht',
-        position: { rail: 1, slot: 0 },
-        teilungseinheiten: 2,
-        bemessungsStrom: 10,
-        bemessungsFehlerstrom: 30,
-        fiTyp: 'A',
-        charakteristik: 'B',
-        polzahl: 2,
-        kurzschlussSchaltvermoegen: 6,
-      },
-      {
-        id: fiLs2Id,
-        type: 'fi-ls-kombi',
-        name: 'FI/LS Steckdosen',
-        position: { rail: 1, slot: 3 },
-        teilungseinheiten: 2,
-        bemessungsStrom: 16,
-        bemessungsFehlerstrom: 30,
-        fiTyp: 'A',
-        charakteristik: 'C',
-        polzahl: 2,
-        kurzschlussSchaltvermoegen: 6,
-      },
-      {
-        id: fiLs3Id,
-        type: 'fi-ls-kombi',
-        name: 'FI/LS Küche',
-        position: { rail: 1, slot: 6 },
-        teilungseinheiten: 2,
-        bemessungsStrom: 16,
-        bemessungsFehlerstrom: 30,
-        fiTyp: 'A',
-        charakteristik: 'C',
-        polzahl: 2,
-        kurzschlussSchaltvermoegen: 6,
-      },
-
-      // Hutschiene 2: Sammelschienen
-      {
-        id: sammelschieneL1Id,
-        type: 'sammelschiene',
-        name: 'L1 Sammelschiene',
-        position: { rail: 2, slot: 0 },
-        teilungseinheiten: 12,
-        phase: 'L1',
-        laenge: 12,
-        querschnitt: 16,
-      },
-      {
-        id: sammelschieneL2Id,
-        type: 'sammelschiene',
-        name: 'L2 Sammelschiene',
-        position: { rail: 2, slot: 12 },
-        teilungseinheiten: 12,
-        phase: 'L2',
-        laenge: 12,
-        querschnitt: 16,
-      },
-
-      // Hutschiene 3: N und PE Sammelschienen
-      {
-        id: sammelschieneL3Id,
-        type: 'sammelschiene',
-        name: 'L3 Sammelschiene',
-        position: { rail: 3, slot: 0 },
-        teilungseinheiten: 8,
-        phase: 'L3',
-        laenge: 8,
-        querschnitt: 16,
-      },
-      {
-        id: sammelschieneNId,
-        type: 'sammelschiene',
-        name: 'N Sammelschiene',
-        position: { rail: 3, slot: 8 },
-        teilungseinheiten: 8,
-        phase: 'N',
-        laenge: 8,
-        querschnitt: 16,
-      },
-      {
-        id: sammelschienePEId,
-        type: 'sammelschiene',
-        name: 'PE Sammelschiene',
-        position: { rail: 3, slot: 16 },
-        teilungseinheiten: 8,
-        phase: 'PE',
-        laenge: 8,
-        querschnitt: 16,
-      },
-    ] as ElektroComponent[],
-    verbraucher: [
-      {
-        id: uuidv4(),
-        name: 'Wohnzimmer Licht',
-        typ: 'licht',
-        leistung: 200,
-        spannung: 230,
-        phasen: ['L1'],
-        gleichzeitigkeitsfaktor: 0.8,
-        zugewieseneKomponente: fiLs1Id,
-      },
-      {
-        id: uuidv4(),
-        name: 'Wohnzimmer Steckdosen',
-        typ: 'steckdose',
-        leistung: 3680,
-        spannung: 230,
-        phasen: ['L2'],
-        gleichzeitigkeitsfaktor: 0.3,
-        zugewieseneKomponente: fiLs2Id,
-      },
-      {
-        id: uuidv4(),
-        name: 'Küche Geräte',
-        typ: 'steckdose',
-        leistung: 3680,
-        spannung: 230,
-        phasen: ['L3'],
-        gleichzeitigkeitsfaktor: 0.5,
-        zugewieseneKomponente: fiLs3Id,
-      },
-    ],
-    verbindungen: [],
-  };
-}
 
 export default useStore;

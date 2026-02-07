@@ -41,6 +41,12 @@ export type LSCharakteristik = 'A' | 'B' | 'C' | 'D' | 'K' | 'Z';
 // FI-Typen
 export type FITyp = 'A' | 'AC' | 'B' | 'B+' | 'F';
 
+// Verlegearten gemäß ÖVE E 8101
+export type Verlegeart = 'A1' | 'A2' | 'B1' | 'B2' | 'C' | 'D1' | 'D2';
+
+// Leitermaterial
+export type Leitermaterial = 'kupfer' | 'aluminium';
+
 // FI-Verzögerung
 export type FIVerzoegerung = 'Standard' | 'G' | 'S';
 
@@ -211,6 +217,8 @@ export interface Verbraucher {
   zugewieseneKomponente?: string; // ID der zugewiesenen Schutzeinrichtung (LS oder Abgangsklemme)
   leitungslaenge?: number;      // Leitungslänge in [m]
   leitungsquerschnitt?: number; // Leitungsquerschnitt in [mm²]
+  verlegeart: Verlegeart;       // Verlegeart gemäß ÖVE E 8101
+  leitermaterial: Leitermaterial; // Kupfer oder Aluminium
 }
 
 // Default-Werte für Verbraucher
@@ -232,6 +240,17 @@ export const VERBRAUCHER_DEFAULTS: Record<VerbraucherTyp, { leistung: number; sp
 
 // Verfügbare Leitungsquerschnitte in mm² (gemäß ÖVE)
 export const VERFUEGBARE_QUERSCHNITTE = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120];
+
+// Beschreibungen der Verlegearten gemäß ÖVE E 8101
+export const VERLEGEART_BESCHREIBUNGEN: Record<Verlegeart, string> = {
+  A1: 'Isolierte oder ummantelte Leiter in Rohr in wärmedämmendem Material',
+  A2: 'Mehradrige Kabel in Rohr in wärmedämmendem Material',
+  B1: 'Isolierte oder ummantelte Leiter in Rohr auf oder in Wand',
+  B2: 'Mehradrige Kabel in Rohr auf oder in Wand',
+  C: 'Mehradrige Kabel direkt auf/in Wand oder frei in der Luft',
+  D1: 'Mehradrige Kabel in Erde (direkt verlegt)',
+  D2: 'Mehradrige Kabel in Rohr in Erde',
+};
 
 // ==========================================
 // VERDRAHTUNG / VERBINDUNGEN
@@ -303,7 +322,8 @@ export type FehlerTyp =
   | 'fehlerstrom'
   | 'erdung'
   | 'drehfeld'
-  | 'fehlende-schutzeinrichtung';
+  | 'fehlende-schutzeinrichtung'
+  | 'kabelueberlastung';
 
 export interface ValidationError {
   id: string;

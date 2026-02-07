@@ -20,7 +20,6 @@ export const Header: React.FC = () => {
     setSelectedPhase,
     resetProject,
     resetProjectCustom,
-    loadTemplate,
     loadProject,
     updateVerteilerInfo,
   } = useStore();
@@ -53,12 +52,6 @@ export const Header: React.FC = () => {
   const handleCreateCustom = () => {
     resetProjectCustom({ slots: customSlots, schienen: customSchienen });
     setShowNewProjectDialog(false);
-  };
-
-  const handleLoadTemplate = () => {
-    if (confirm('Vorlage laden? Das aktuelle Projekt wird ersetzt.')) {
-      loadTemplate();
-    }
   };
 
   // Projekt speichern
@@ -159,13 +152,6 @@ export const Header: React.FC = () => {
               title="Projekt öffnen"
             >
               📂 Öffnen
-            </button>
-            <button
-              onClick={handleLoadTemplate}
-              className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded"
-              title="Standard-Vorlage laden"
-            >
-              📋 Vorlage
             </button>
             {/* Hidden file input for loading projects */}
             <input

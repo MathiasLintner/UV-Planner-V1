@@ -79,6 +79,107 @@ const RHO_ALUMINIUM = 0.0286;
 const MAX_ABSCHALTZEIT_230V = 0.4; // Sekunden
 
 // ==========================================
+// STROMBELASTBARKEIT NACH ÖVE E 8101
+// ==========================================
+
+// Strombelastbarkeit nach ÖVE E 8101 (aus kabel_belastbarkeit.json)
+// Struktur: [anzahl_belastete_adern][material][querschnitt][verlegeart]
+const KABEL_BELASTBARKEIT = {
+  2: { // 2 belastete Adern (1-phasig)
+    kupfer: {
+      1.5: { A1: 14.5, A2: 14, B1: 17.5, B2: 16.5, C: 19.5, D1: 22, D2: 22 },
+      2.5: { A1: 19.5, A2: 18.5, B1: 24, B2: 23, C: 27, D1: 29, D2: 28 },
+      4: { A1: 26, A2: 25, B1: 32, B2: 30, C: 36, D1: 37, D2: 38 },
+      6: { A1: 34, A2: 32, B1: 41, B2: 38, C: 46, D1: 46, D2: 48 },
+      10: { A1: 46, A2: 43, B1: 57, B2: 52, C: 63, D1: 60, D2: 64 },
+      16: { A1: 61, A2: 57, B1: 76, B2: 69, C: 85, D1: 78, D2: 83 },
+      25: { A1: 80, A2: 75, B1: 101, B2: 90, C: 112, D1: 99, D2: 110 },
+      35: { A1: 99, A2: 92, B1: 125, B2: 111, C: 138, D1: 119, D2: 132 },
+      50: { A1: 119, A2: 110, B1: 151, B2: 133, C: 168, D1: 140, D2: 156 },
+      70: { A1: 151, A2: 139, B1: 192, B2: 168, C: 213, D1: 173, D2: 192 },
+      95: { A1: 182, A2: 167, B1: 232, B2: 201, C: 258, D1: 204, D2: 230 },
+      120: { A1: 210, A2: 192, B1: 269, B2: 232, C: 299, D1: 231, D2: 261 },
+      150: { A1: 240, A2: 219, B1: 309, B2: 258, C: 344, D1: 261, D2: 293 },
+      185: { A1: 273, A2: 248, B1: 341, B2: 294, C: 392, D1: 292, D2: 331 },
+      240: { A1: 321, A2: 291, B1: 400, B2: 344, C: 461, D1: 336, D2: 382 },
+      300: { A1: 367, A2: 334, B1: 458, B2: 394, C: 530, D1: 379, D2: 427 },
+    },
+    aluminium: {
+      2.5: { A1: 15, A2: 14.5, B1: 18.5, B2: 17.5, C: 21, D1: 22 },
+      4: { A1: 20, A2: 19.5, B1: 25, B2: 24, C: 28, D1: 29 },
+      6: { A1: 26, A2: 25, B1: 32, B2: 30, C: 36, D1: 36 },
+      10: { A1: 36, A2: 33, B1: 44, B2: 41, C: 49, D1: 47 },
+      16: { A1: 48, A2: 44, B1: 60, B2: 54, C: 66, D1: 61, D2: 63 },
+      25: { A1: 63, A2: 58, B1: 79, B2: 71, C: 83, D1: 77, D2: 82 },
+      35: { A1: 77, A2: 71, B1: 97, B2: 86, C: 103, D1: 93, D2: 98 },
+      50: { A1: 93, A2: 86, B1: 118, B2: 104, C: 125, D1: 109, D2: 117 },
+      70: { A1: 118, A2: 108, B1: 150, B2: 131, C: 160, D1: 135, D2: 145 },
+      95: { A1: 142, A2: 130, B1: 181, B2: 157, C: 195, D1: 159, D2: 173 },
+      120: { A1: 164, A2: 150, B1: 210, B2: 181, C: 226, D1: 180, D2: 200 },
+      150: { A1: 189, A2: 172, B1: 234, B2: 201, C: 261, D1: 204, D2: 224 },
+      185: { A1: 215, A2: 195, B1: 266, B2: 230, C: 298, D1: 228, D2: 255 },
+      240: { A1: 252, A2: 229, B1: 312, B2: 269, C: 352, D1: 262, D2: 298 },
+      300: { A1: 289, A2: 263, B1: 358, B2: 308, C: 406, D1: 296, D2: 338 },
+    },
+  },
+  3: { // 3 belastete Adern (3-phasig)
+    kupfer: {
+      1.5: { A1: 13.5, A2: 13, B1: 15.5, B2: 15, C: 17.5, D1: 18, D2: 19 },
+      2.5: { A1: 18, A2: 17.5, B1: 21, B2: 20, C: 24, D1: 24, D2: 24 },
+      4: { A1: 24, A2: 23, B1: 28, B2: 27, C: 32, D1: 30, D2: 33 },
+      6: { A1: 31, A2: 29, B1: 36, B2: 34, C: 41, D1: 38, D2: 41 },
+      10: { A1: 42, A2: 39, B1: 50, B2: 46, C: 57, D1: 50, D2: 54 },
+      16: { A1: 56, A2: 52, B1: 68, B2: 62, C: 76, D1: 64, D2: 70 },
+      25: { A1: 73, A2: 68, B1: 89, B2: 80, C: 96, D1: 82, D2: 92 },
+      35: { A1: 89, A2: 83, B1: 110, B2: 99, C: 119, D1: 98, D2: 110 },
+      50: { A1: 108, A2: 99, B1: 134, B2: 118, C: 144, D1: 116, D2: 130 },
+      70: { A1: 136, A2: 125, B1: 171, B2: 149, C: 184, D1: 143, D2: 162 },
+      95: { A1: 164, A2: 150, B1: 207, B2: 179, C: 223, D1: 169, D2: 193 },
+      120: { A1: 188, A2: 172, B1: 239, B2: 206, C: 259, D1: 192, D2: 220 },
+      150: { A1: 216, A2: 196, B1: 262, B2: 225, C: 299, D1: 217, D2: 246 },
+      185: { A1: 245, A2: 223, B1: 296, B2: 255, C: 341, D1: 243, D2: 278 },
+      240: { A1: 286, A2: 261, B1: 346, B2: 297, C: 403, D1: 280, D2: 320 },
+      300: { A1: 328, A2: 298, B1: 394, B2: 339, C: 464, D1: 316, D2: 359 },
+    },
+    aluminium: {
+      2.5: { A1: 14, A2: 13.5, B1: 16.5, B2: 15.5, C: 18.5, D1: 18.5 },
+      4: { A1: 18.5, A2: 17.5, B1: 22, B2: 21, C: 25, D1: 24 },
+      6: { A1: 24, A2: 23, B1: 28, B2: 27, C: 32, D1: 30 },
+      10: { A1: 32, A2: 31, B1: 39, B2: 36, C: 44, D1: 39 },
+      16: { A1: 43, A2: 41, B1: 53, B2: 48, C: 59, D1: 50, D2: 53 },
+      25: { A1: 57, A2: 53, B1: 70, B2: 62, C: 73, D1: 64, D2: 69 },
+      35: { A1: 70, A2: 65, B1: 86, B2: 77, C: 90, D1: 77, D2: 83 },
+      50: { A1: 84, A2: 78, B1: 104, B2: 92, C: 110, D1: 91, D2: 99 },
+      70: { A1: 107, A2: 98, B1: 133, B2: 116, C: 140, D1: 112, D2: 122 },
+      95: { A1: 129, A2: 118, B1: 161, B2: 139, C: 170, D1: 132, D2: 148 },
+      120: { A1: 149, A2: 135, B1: 186, B2: 160, C: 197, D1: 150, D2: 169 },
+      150: { A1: 170, A2: 155, B1: 204, B2: 176, C: 227, D1: 169, D2: 189 },
+      185: { A1: 194, A2: 176, B1: 230, B2: 199, C: 259, D1: 190, D2: 214 },
+      240: { A1: 227, A2: 207, B1: 269, B2: 232, C: 305, D1: 218, D2: 250 },
+      300: { A1: 261, A2: 237, B1: 306, B2: 265, C: 351, D1: 247, D2: 282 },
+    },
+  },
+};
+
+// Funktion zum Abrufen der Strombelastbarkeit
+function getStrombelastbarkeit(
+  querschnitt: number,
+  material: 'kupfer' | 'aluminium',
+  verlegeart: string,
+  anzahlAdern: 2 | 3
+): number | null {
+  const aderData = KABEL_BELASTBARKEIT[anzahlAdern]?.[material];
+
+  if (!aderData) return null;
+
+  const querschnittData = (aderData as any)[String(querschnitt)];
+  if (!querschnittData) return null;
+
+  const belastbarkeit = querschnittData[verlegeart];
+  return typeof belastbarkeit === 'number' ? belastbarkeit : null;
+}
+
+// ==========================================
 // HAUPT-VALIDIERUNGSFUNKTION
 // ==========================================
 
@@ -161,6 +262,11 @@ export function validateVerteiler(verteiler: Verteiler): ValidationResult {
   // 18. Prüfe ob einzelne Verbraucher höheren Strom als vorgelagerte Sicherung haben
   const verbraucherUeberstromFehler = checkVerbraucherUeberstrom(verteiler);
   errors.push(...verbraucherUeberstromFehler);
+
+  // 19. Prüfe Kabelbelastbarkeit (Strombelastbarkeit des Leiters vs. Nennstrom der Schutzeinrichtung)
+  const kabelbelastbarkeitFehler = checkKabelbelastbarkeit(verteiler);
+  errors.push(...kabelbelastbarkeitFehler.errors);
+  warnings.push(...kabelbelastbarkeitFehler.warnings);
 
   // Berechne Gesamtwerte
   const berechnungen = berechneGesamtwerte(verteiler);
@@ -1752,4 +1858,137 @@ function checkVerbraucherUeberstrom(verteiler: Verteiler): ValidationError[] {
   }
 
   return errors;
+}
+
+// ==========================================
+// 19. KABELBELASTBARKEIT PRÜFEN
+// ==========================================
+
+function checkKabelbelastbarkeit(verteiler: Verteiler): { errors: ValidationError[]; warnings: ValidationError[] } {
+  const errors: ValidationError[] = [];
+  const warnings: ValidationError[] = [];
+
+  // Prüfe jeden Verbraucher
+  for (const verbraucher of verteiler.verbraucher) {
+    // Überspringe Verbraucher ohne Zuweisung oder ohne Leitungsdaten
+    if (!verbraucher.zugewieseneKomponente) continue;
+    if (!verbraucher.leitungsquerschnitt || !verbraucher.verlegeart || !verbraucher.leitermaterial) continue;
+
+    // Finde die zugewiesene Komponente
+    const zugewieseneKomponente = verteiler.komponenten.find(
+      (k) => k.id === verbraucher.zugewieseneKomponente
+    );
+
+    if (!zugewieseneKomponente) continue;
+
+    // Bestimme die Anzahl der belasteten Adern
+    const anzahlAdern = verbraucher.spannung === 400 ? 3 : 2;
+
+    // Hole die Strombelastbarkeit aus der Tabelle
+    const strombelastbarkeit = getStrombelastbarkeit(
+      verbraucher.leitungsquerschnitt,
+      verbraucher.leitermaterial,
+      verbraucher.verlegeart,
+      anzahlAdern
+    );
+
+    // Wenn keine Daten vorhanden, überspringe
+    if (strombelastbarkeit === null) {
+      warnings.push({
+        id: uuidv4(),
+        typ: 'kabelueberlastung',
+        komponenteId: verbraucher.id,
+        komponenteName: verbraucher.name,
+        beschreibung: `Keine Strombelastbarkeitsdaten für ${verbraucher.leitungsquerschnitt}mm² ${verbraucher.leitermaterial} ${verbraucher.verlegeart}`,
+        hinweis: `Für die gewählte Kombination aus Querschnitt, Material und Verlegeart konnten keine Belastbarkeitsdaten aus ÖVE E 8101 gefunden werden. Bitte prüfen Sie die Eingaben.`,
+        schweregrad: 'warnung',
+      });
+      continue;
+    }
+
+    // Bestimme den Bemessungsstrom der Schutzeinrichtung
+    let bemessungsStrom = 0;
+    let schutzeinrichtungsTyp = '';
+    let istSchmelzsicherung = false;
+
+    // Prüfe verschiedene Schutzeinrichtungstypen
+    if (zugewieseneKomponente.type === 'ls-schalter') {
+      bemessungsStrom = (zugewieseneKomponente as LSSchalterParams).bemessungsStrom;
+      schutzeinrichtungsTyp = 'LS-Schalter';
+    } else if (zugewieseneKomponente.type === 'fi-ls-kombi') {
+      bemessungsStrom = (zugewieseneKomponente as FILSKombiParams).bemessungsStrom;
+      schutzeinrichtungsTyp = 'FI/LS-Kombination';
+    } else if (zugewieseneKomponente.type === 'nh-sicherung') {
+      bemessungsStrom = (zugewieseneKomponente as NHSicherungParams).bemessungsStrom;
+      schutzeinrichtungsTyp = 'NH-Sicherung';
+      istSchmelzsicherung = true;
+    } else if (zugewieseneKomponente.type === 'neozed-sicherung') {
+      bemessungsStrom = (zugewieseneKomponente as NeozedSicherungParams).bemessungsStrom;
+      schutzeinrichtungsTyp = 'Neozed-Sicherung';
+      istSchmelzsicherung = true;
+    } else if (zugewieseneKomponente.type === 'schraub-sicherung') {
+      bemessungsStrom = (zugewieseneKomponente as SchraubSicherungParams).bemessungsStrom;
+      schutzeinrichtungsTyp = 'Schraub-Sicherung';
+      istSchmelzsicherung = true;
+    } else if (zugewieseneKomponente.type === 'abgangsklemme') {
+      // Bei Abgangsklemmen: Suche vorgeschaltete Schutzeinrichtung
+      const vorgeschalteteSchutzeinrichtungen = findSeriesProtection(verteiler, zugewieseneKomponente.id);
+
+      for (const schutz of vorgeschalteteSchutzeinrichtungen) {
+        if (schutz.type === 'ls-schalter') {
+          bemessungsStrom = (schutz as LSSchalterParams).bemessungsStrom;
+          schutzeinrichtungsTyp = 'vorgeschalteter LS-Schalter';
+          break;
+        } else if (schutz.type === 'fi-ls-kombi') {
+          bemessungsStrom = (schutz as FILSKombiParams).bemessungsStrom;
+          schutzeinrichtungsTyp = 'vorgeschaltete FI/LS-Kombination';
+          break;
+        } else if (schutz.type === 'nh-sicherung') {
+          bemessungsStrom = (schutz as NHSicherungParams).bemessungsStrom;
+          schutzeinrichtungsTyp = 'vorgeschaltete NH-Sicherung';
+          istSchmelzsicherung = true;
+          break;
+        } else if (schutz.type === 'neozed-sicherung') {
+          bemessungsStrom = (schutz as NeozedSicherungParams).bemessungsStrom;
+          schutzeinrichtungsTyp = 'vorgeschaltete Neozed-Sicherung';
+          istSchmelzsicherung = true;
+          break;
+        } else if (schutz.type === 'schraub-sicherung') {
+          bemessungsStrom = (schutz as SchraubSicherungParams).bemessungsStrom;
+          schutzeinrichtungsTyp = 'vorgeschaltete Schraub-Sicherung';
+          istSchmelzsicherung = true;
+          break;
+        }
+      }
+    }
+
+    // Wenn kein Bemessungsstrom gefunden, überspringe
+    if (bemessungsStrom === 0) continue;
+
+    // Wende die Schaltstromregel an
+    // Für LS: Strombelastbarkeit × 1,45 > Nennstrom × 1,45  =>  Strombelastbarkeit > Nennstrom
+    // Für Schmelzsicherungen: Strombelastbarkeit × 1,45 > Nennstrom × 1,6  =>  Strombelastbarkeit > Nennstrom × 1,103
+
+    const erforderlicheStrombelastbarkeit = istSchmelzsicherung
+      ? bemessungsStrom * (1.6 / 1.45) // ≈ 1.103
+      : bemessungsStrom;
+
+    if (strombelastbarkeit < erforderlicheStrombelastbarkeit) {
+      const fehlerText = istSchmelzsicherung
+        ? `Kabelquerschnitt zu gering: ${verbraucher.leitungsquerschnitt}mm² trägt nur ${strombelastbarkeit}A (${verbraucher.verlegeart}), benötigt aber ${erforderlicheStrombelastbarkeit.toFixed(1)}A für ${bemessungsStrom}A ${schutzeinrichtungsTyp} (Schaltstromregel: Iz × 1,45 > In × 1,6)`
+        : `Kabelquerschnitt zu gering: ${verbraucher.leitungsquerschnitt}mm² trägt nur ${strombelastbarkeit}A (${verbraucher.verlegeart}), benötigt aber mindestens ${erforderlicheStrombelastbarkeit}A für ${bemessungsStrom}A ${schutzeinrichtungsTyp} (Schaltstromregel: Iz × 1,45 > In × 1,45)`;
+
+      errors.push({
+        id: uuidv4(),
+        typ: 'kabelueberlastung',
+        komponenteId: verbraucher.id,
+        komponenteName: verbraucher.name,
+        beschreibung: fehlerText,
+        hinweis: `Gemäß ÖVE E 8101 muss die Strombelastbarkeit des Leiters (Iz) die Bedingung erfüllen: ${istSchmelzsicherung ? 'Iz × 1,45 > In × 1,6 (bei Schmelzsicherungen)' : 'Iz ≥ In (bei Leitungsschutzschaltern)'}. Wählen Sie einen größeren Kabelquerschnitt oder ändern Sie die Verlegeart (z.B. von ${verbraucher.verlegeart} zu einer besser belüfteten Verlegeart).`,
+        schweregrad: 'fehler',
+      });
+    }
+  }
+
+  return { errors, warnings };
 }

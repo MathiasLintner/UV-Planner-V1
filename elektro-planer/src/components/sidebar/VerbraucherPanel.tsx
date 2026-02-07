@@ -2,8 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useDrag } from 'react-dnd';
 import { useStore } from '../../store/useStore';
-import type { Verbraucher, VerbraucherTyp, Phase } from '../../types';
-import { VERBRAUCHER_DEFAULTS, VERFUEGBARE_QUERSCHNITTE, PHASE_COLORS } from '../../types';
+import type { Verbraucher, VerbraucherTyp, Phase, Verlegeart, Leitermaterial } from '../../types';
+import { VERBRAUCHER_DEFAULTS, VERFUEGBARE_QUERSCHNITTE, PHASE_COLORS, VERLEGEART_BESCHREIBUNGEN } from '../../types';
 import { detectPhaseForComponent } from '../../utils/circuitGraph';
 
 const VERBRAUCHER_ICONS: Record<VerbraucherTyp, string> = {
@@ -46,6 +46,8 @@ export const VerbraucherPanel: React.FC = () => {
       gleichzeitigkeitsfaktor: newVerbraucher.gleichzeitigkeitsfaktor || 1,
       leitungslaenge: 20,      // Default: 20 Meter
       leitungsquerschnitt: 2.5, // Default: 2,5 mm²
+      verlegeart: 'B1',        // Default: B1 (Rohr auf/in Wand)
+      leitermaterial: 'kupfer', // Default: Kupfer
     };
 
     addVerbraucher(verbraucher);
@@ -323,11 +325,15 @@ const VerbraucherItem: React.FC<{ verbraucher: Verbraucher }> = ({ verbraucher }
             <span>•</span>
             <span>GZF: {verbraucher.gleichzeitigkeitsfaktor}</span>
           </div>
-          {(verbraucher.leitungslaenge || verbraucher.leitungsquerschnitt) && (
+          {(verbraucher.leitungslaenge || verbraucher.leitungsquerschnitt || verbraucher.verlegeart || verbraucher.leitermaterial) && (
             <div className="text-xs text-blue-600">
               {verbraucher.leitungslaenge && `${verbraucher.leitungslaenge}m`}
               {verbraucher.leitungslaenge && verbraucher.leitungsquerschnitt && ' • '}
               {verbraucher.leitungsquerschnitt && `${verbraucher.leitungsquerschnitt}mm²`}
+              {verbraucher.leitungsquerschnitt && verbraucher.leitermaterial && ' • '}
+              {verbraucher.leitermaterial && verbraucher.leitermaterial.charAt(0).toUpperCase() + verbraucher.leitermaterial.slice(1)}
+              {verbraucher.leitermaterial && verbraucher.verlegeart && ' • '}
+              {verbraucher.verlegeart && `${verbraucher.verlegeart}`}
             </div>
           )}
         </div>
@@ -427,6 +433,34 @@ const VerbraucherItem: React.FC<{ verbraucher: Verbraucher }> = ({ verbraucher }
                 {VERFUEGBARE_QUERSCHNITTE.map((q) => (
                   <option key={q} value={q}>
                     {q} mm²
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Leitermaterial</label>
+              <select
+                value={verbraucher.leitermaterial || 'kupfer'}
+                onChange={(e) => updateVerbraucher(verbraucher.id, { leitermaterial: e.target.value as Leitermaterial })}
+                className="w-full px-2 py-1 border rounded text-sm"
+              >
+                <option value="kupfer">Kupfer</option>
+                <option value="aluminium">Aluminium</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Verlegeart</label>
+              <select
+                value={verbraucher.verlegeart || 'B1'}
+                onChange={(e) => updateVerbraucher(verbraucher.id, { verlegeart: e.target.value as Verlegeart })}
+                className="w-full px-2 py-1 border rounded text-sm"
+                title={verbraucher.verlegeart ? VERLEGEART_BESCHREIBUNGEN[verbraucher.verlegeart] : ''}
+              >
+                {(Object.keys(VERLEGEART_BESCHREIBUNGEN) as Verlegeart[]).map((art) => (
+                  <option key={art} value={art} title={VERLEGEART_BESCHREIBUNGEN[art]}>
+                    {art} - {VERLEGEART_BESCHREIBUNGEN[art].substring(0, 30)}...
                   </option>
                 ))}
               </select>
