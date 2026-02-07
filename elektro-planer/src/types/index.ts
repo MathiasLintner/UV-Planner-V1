@@ -30,7 +30,8 @@ export type ComponentType =
   | 'schuetz'
   | 'klemme'
   | 'versorgungsklemme'
-  | 'abgangsklemme';
+  | 'abgangsklemme'
+  | 'ueberspannungsschutz';
 
 // Netzsystem-Typen
 export type Netzsystem = 'TN-C' | 'TN-S' | 'TN-C-S' | 'TT' | 'IT';
@@ -52,6 +53,12 @@ export type FIVerzoegerung = 'Standard' | 'G' | 'S';
 
 // Sicherungs-Kennlinien (Betriebsklassen)
 export type SicherungsKennlinie = 'gG' | 'gL' | 'aM' | 'aR' | 'gR' | 'gS';
+
+// Überspannungsschutz-Typen
+export type SPDKlasse = 'Typ 1' | 'Typ 2' | 'Typ 3' | 'Typ 1+2';
+
+// Überspannungsschutz-Systemtyp
+export type SPDSystemTyp = 'AC' | 'DC';
 
 // ==========================================
 // KOMPONENTEN-PARAMETER
@@ -171,6 +178,16 @@ export interface AbgangsklemmeParams extends BaseComponentParams {
   zugewieseneVerbraucher: string[]; // IDs der zugewiesenen Verbraucher
 }
 
+// Überspannungsschutz (SPD) Parameter
+export interface UeberspannungsschutzParams extends BaseComponentParams {
+  type: 'ueberspannungsschutz';
+  systemTyp: SPDSystemTyp;      // AC oder DC
+  klasse: SPDKlasse;            // Typ 1, Typ 2, Typ 3 oder Typ 1+2
+  bemessungsSpannung: number;   // Uc [V]
+  nennAbleistrom: number;       // In [kA]
+  polzahl: 2 | 3;               // 2-polig (DC) oder 3-polig (AC)
+}
+
 // Union-Typ für alle Komponenten
 export type ElektroComponent =
   | FISchalterParams
@@ -184,7 +201,8 @@ export type ElektroComponent =
   | SchuetzParams
   | KlemmeParams
   | VersorgungsklemmeParams
-  | AbgangsklemmeParams;
+  | AbgangsklemmeParams
+  | UeberspannungsschutzParams;
 
 // ==========================================
 // VERBRAUCHER
@@ -798,5 +816,40 @@ export const COMPONENT_LIBRARY: ComponentLibraryItem[] = [
       polzahl: 3,
     },
     kategorie: 'schaltung',
+  },
+  // ==========================================
+  // ÜBERSPANNUNGSSCHUTZ (SPD)
+  // ==========================================
+  {
+    type: 'ueberspannungsschutz',
+    variantId: 'spd-ac-3p',
+    name: 'ÜSpg-Schutz AC 3-polig',
+    beschreibung: 'Überspannungsschutz für AC (L1+L2+L3)',
+    icon: 'SPD',
+    teilungseinheiten: 3,
+    defaultParams: {
+      systemTyp: 'AC',
+      klasse: 'Typ 1+2',
+      bemessungsSpannung: 400,
+      nennAbleistrom: 20,
+      polzahl: 3,
+    },
+    kategorie: 'schutz',
+  },
+  {
+    type: 'ueberspannungsschutz',
+    variantId: 'spd-dc-2p',
+    name: 'ÜSpg-Schutz DC 2-polig',
+    beschreibung: 'Überspannungsschutz für DC (Plus+Minus)',
+    icon: 'SPD',
+    teilungseinheiten: 2,
+    defaultParams: {
+      systemTyp: 'DC',
+      klasse: 'Typ 2',
+      bemessungsSpannung: 1000,
+      nennAbleistrom: 40,
+      polzahl: 2,
+    },
+    kategorie: 'schutz',
   },
 ];

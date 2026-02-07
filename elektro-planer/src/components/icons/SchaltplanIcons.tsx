@@ -357,6 +357,54 @@ export const AbgangsklemmeIcon: React.FC<IconProps> = ({ width, height, polzahl 
 };
 
 // ==========================================
+// ÜBERSPANNUNGSSCHUTZ (SPD)
+// ==========================================
+export const UeberspannungsschutzIcon: React.FC<IconProps & { systemTyp: 'AC' | 'DC', polzahl: 2 | 3 }> = ({ width, height, systemTyp, polzahl }) => {
+  const poleWidth = width / polzahl;
+
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+      {/* SPD-Gehäuse */}
+      <rect x={2} y={height * 0.2} width={width - 4} height={height * 0.6} fill="#ffebcd" stroke="#333" strokeWidth={1.5} rx={2} />
+
+      {/* SPD-Text */}
+      <text x={width / 2} y={height * 0.55} textAnchor="middle" fontSize={7} fill="#333" fontWeight="bold">SPD</text>
+
+      {Array.from({ length: polzahl }).map((_, i) => {
+        const x = i * poleWidth + poleWidth / 2;
+        return (
+          <g key={i}>
+            {/* Eingang oben */}
+            <line x1={x} y1={0} x2={x} y2={height * 0.2} stroke="#333" strokeWidth={2} />
+
+            {/* Varistor-Symbol (parallele Rechtecke mit Pfeil) */}
+            <rect x={x - 3} y={height * 0.3} width={6} height={height * 0.1} fill="none" stroke="#333" strokeWidth={1} />
+
+            {/* Pfeil durch Varistor (für spannungsabhängigen Widerstand) */}
+            <line x1={x - 4} y1={height * 0.25} x2={x + 4} y2={height * 0.45} stroke="#333" strokeWidth={1.5} />
+            <polygon points={`${x + 3},${height * 0.43} ${x + 4},${height * 0.45} ${x + 2.5},${height * 0.45}`} fill="#333" />
+
+            {/* Funkenstrecke (zwei Elektroden) */}
+            <circle cx={x - 2} cy={height * 0.6} r={2} fill="none" stroke="#333" strokeWidth={1} />
+            <circle cx={x + 2} cy={height * 0.6} r={2} fill="none" stroke="#333" strokeWidth={1} />
+
+            {/* Blitz-Symbol (Überspannung) */}
+            <path d={`M ${x - 1} ${height * 0.55} L ${x + 1} ${height * 0.6} L ${x} ${height * 0.6} L ${x + 1} ${height * 0.65}`}
+                  fill="#ff6b6b" stroke="none" />
+
+            {/* Ausgang unten */}
+            <line x1={x} y1={height * 0.8} x2={x} y2={height} stroke="#333" strokeWidth={2} />
+          </g>
+        );
+      })}
+
+      {/* System-Typ Label */}
+      <text x={width / 2} y={height * 0.15} textAnchor="middle" fontSize={6} fill="#666">{systemTyp}</text>
+    </svg>
+  );
+};
+
+// ==========================================
 // ICON SELECTOR
 // ==========================================
 export const getComponentIcon = (component: ElektroComponent, width: number, height: number): React.ReactNode => {
@@ -385,6 +433,8 @@ export const getComponentIcon = (component: ElektroComponent, width: number, hei
       return <VersorgungsklemmeIcon width={width} height={height} />;
     case 'abgangsklemme':
       return <AbgangsklemmeIcon width={width} height={height} polzahl={component.polzahl} />;
+    case 'ueberspannungsschutz':
+      return <UeberspannungsschutzIcon width={width} height={height} systemTyp={component.systemTyp} polzahl={component.polzahl} />;
     default:
       return null;
   }

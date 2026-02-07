@@ -51,6 +51,9 @@ export function getComponentTerminals(component: ElektroComponent): Terminal[] {
     case 'abgangsklemme':
       return getAbgangsklemmeTerminals(component.polzahl);
 
+    case 'ueberspannungsschutz':
+      return getSPDTerminals(component.systemTyp, component.polzahl);
+
     default:
       return [];
   }
@@ -334,6 +337,36 @@ function getAbgangsklemmeTerminals(polzahl: 3 | 5): Terminal[] {
         { id: `OUT_${phase}`, label, phase, position: 'bottom', offsetX }
       );
     });
+  }
+
+  return terminals;
+}
+
+// ==========================================
+// ÜBERSPANNUNGSSCHUTZ (SPD) TERMINALS
+// ==========================================
+function getSPDTerminals(systemTyp: 'AC' | 'DC', polzahl: 2 | 3): Terminal[] {
+  const terminals: Terminal[] = [];
+
+  if (polzahl === 3 || systemTyp === 'AC') {
+    // AC 3-polig: L1, L2, L3
+    const phases: Phase[] = ['L1', 'L2', 'L3'];
+    phases.forEach((phase, i) => {
+      const offsetX = (i + 0.5) / 3;
+      terminals.push(
+        { id: `IN_${phase}`, label: phase, phase, position: 'top', offsetX },
+        { id: `OUT_${phase}`, label: phase, phase, position: 'bottom', offsetX }
+      );
+    });
+  } else {
+    // DC 2-polig: Plus (+) und Minus (-)
+    // Verwende L1 für Plus und N für Minus (Mapping auf existierende Phasen)
+    terminals.push(
+      { id: 'IN_PLUS', label: '+', phase: 'L1', position: 'top', offsetX: 0.25 },
+      { id: 'IN_MINUS', label: '-', phase: 'N', position: 'top', offsetX: 0.75 },
+      { id: 'OUT_PLUS', label: '+', phase: 'L1', position: 'bottom', offsetX: 0.25 },
+      { id: 'OUT_MINUS', label: '-', phase: 'N', position: 'bottom', offsetX: 0.75 }
+    );
   }
 
   return terminals;

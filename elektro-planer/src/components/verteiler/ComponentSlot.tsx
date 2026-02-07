@@ -235,6 +235,16 @@ function createComponentFromVariant(
         querschnitt: (libItem.defaultParams as any).querschnitt || 16,
         zugewieseneVerbraucher: (libItem.defaultParams as any).zugewieseneVerbraucher || [],
       };
+    case 'ueberspannungsschutz':
+      return {
+        ...baseParams,
+        type: 'ueberspannungsschutz',
+        systemTyp: (libItem.defaultParams as any).systemTyp || 'AC',
+        klasse: (libItem.defaultParams as any).klasse || 'Typ 2',
+        bemessungsSpannung: (libItem.defaultParams as any).bemessungsSpannung || 400,
+        nennAbleistrom: (libItem.defaultParams as any).nennAbleistrom || 20,
+        polzahl: (libItem.defaultParams as any).polzahl || 3,
+      };
     default:
       return null;
   }

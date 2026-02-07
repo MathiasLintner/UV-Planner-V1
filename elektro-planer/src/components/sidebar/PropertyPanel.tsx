@@ -13,9 +13,12 @@ import type {
   SchuetzParams,
   KlemmeParams,
   VersorgungsklemmeParams,
+  UeberspannungsschutzParams,
   Phase,
   Netzsystem,
   SicherungsKennlinie,
+  SPDKlasse,
+  SPDSystemTyp,
 } from '../../types';
 
 // Aufklappbare Sektion
@@ -201,6 +204,8 @@ function renderTypeSpecificProperties(
       return <KlemmeProperties component={component} onUpdate={handleUpdate} />;
     case 'versorgungsklemme':
       return <VersorgungsklemmeProperties component={component} onUpdate={handleUpdate} />;
+    case 'ueberspannungsschutz':
+      return <UeberspannungsschutzProperties component={component} onUpdate={handleUpdate} />;
     default:
       return null;
   }
@@ -808,6 +813,55 @@ const VersorgungsklemmeProperties: React.FC<{
         { value: 'IT', label: 'IT (isoliert)' },
       ]}
       onChange={(v) => onUpdate({ netzsystem: v as Netzsystem })}
+    />
+  </div>
+);
+
+// Überspannungsschutz (SPD)
+const UeberspannungsschutzProperties: React.FC<{
+  component: UeberspannungsschutzParams;
+  onUpdate: (updates: Partial<UeberspannungsschutzParams>) => void;
+}> = ({ component, onUpdate }) => (
+  <div className="space-y-3">
+    <PropertyInput
+      label="Schutzklasse"
+      value={component.klasse}
+      type="text"
+      options={[
+        { value: 'Typ 1', label: 'Typ 1 (Blitzschutz)' },
+        { value: 'Typ 2', label: 'Typ 2 (Überspannung)' },
+        { value: 'Typ 3', label: 'Typ 3 (Feinschutz)' },
+        { value: 'Typ 1+2', label: 'Typ 1+2 (Kombi)' },
+      ]}
+      onChange={(v) => onUpdate({ klasse: v as SPDKlasse })}
+    />
+    <PropertyInput
+      label="Bemessungsspannung Uc"
+      value={component.bemessungsSpannung}
+      unit="V"
+      options={[
+        { value: 230, label: '230 V' },
+        { value: 400, label: '400 V' },
+        { value: 600, label: '600 V' },
+        { value: 1000, label: '1000 V' },
+        { value: 1500, label: '1500 V' },
+      ]}
+      onChange={(v) => onUpdate({ bemessungsSpannung: v })}
+    />
+    <PropertyInput
+      label="Nennableistrom In"
+      value={component.nennAbleistrom}
+      unit="kA"
+      options={[
+        { value: 5, label: '5 kA' },
+        { value: 10, label: '10 kA' },
+        { value: 15, label: '15 kA' },
+        { value: 20, label: '20 kA' },
+        { value: 40, label: '40 kA' },
+        { value: 60, label: '60 kA' },
+        { value: 100, label: '100 kA' },
+      ]}
+      onChange={(v) => onUpdate({ nennAbleistrom: v })}
     />
   </div>
 );
