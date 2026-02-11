@@ -543,12 +543,12 @@ function checkSchleifenimpedanz(verteiler: Verteiler): ValidationError[] {
   ) as (LSSchalterParams | FILSKombiParams)[];
 
   for (const schutz of schutzeinrichtungen) {
-    // Berechne maximale zulässige Schleifenimpedanz
-    // Zs_max = U0 / Ia (U0 = 230V, Ia = Auslösestrom)
+    // Berechne maximale zulässige Schleifenimpedanz nach ÖVE/ÖNORM E 8001-1
+    // Zs_max = (2/3) × U0 / Ia (2/3-Regel für TN-System, 0,4s Abschaltzeit)
     const charakteristik = schutz.charakteristik;
     const bemessungsStrom = schutz.bemessungsStrom;
 
-    // Auslösestrom je nach Charakteristik
+    // Auslösestrom je nach Charakteristik (magnetisches Auslösen)
     let ausloeseFaktor = 5; // Default für B
     switch (charakteristik) {
       case 'B':
@@ -564,7 +564,7 @@ function checkSchleifenimpedanz(verteiler: Verteiler): ValidationError[] {
     }
 
     const ausloesestrom = bemessungsStrom * ausloeseFaktor;
-    const zsMax = 230 / ausloesestrom;
+    const zsMax = (2 / 3) * (230 / ausloesestrom); // 2/3-Regel
 
     // Schleifenimpedanz am Einspeisepunkt:
     // Priorität: 1. Schleifenimpedanz der Versorgungsklemme, 2. Aus Kurzschlussstrom berechnet
@@ -1426,7 +1426,7 @@ function checkVerbraucherSchleifenimpedanz(verteiler: Verteiler): { errors: Vali
     let minZsMax = Infinity;
 
     for (const schutz of schutzeinrichtungenAufPfad) {
-      // Berechne Auslösefaktor
+      // Berechne Auslösefaktor (magnetisches Auslösen)
       let ausloeseFaktor = 5;
       switch (schutz.charakteristik) {
         case 'B': ausloeseFaktor = 5; break;
@@ -1436,7 +1436,8 @@ function checkVerbraucherSchleifenimpedanz(verteiler: Verteiler): { errors: Vali
       }
 
       const ausloesestrom = schutz.bemessungsStrom * ausloeseFaktor;
-      const zsMax = 230 / ausloesestrom; // in Ω
+      // 2/3-Regel für TN-Systeme (Abschaltzeit 0,4s bei 230V)
+      const zsMax = (2 / 3) * (230 / ausloesestrom); // in Ω
 
       // Kann diese Schutzeinrichtung auslösen?
       if (zsGesamtOhm <= zsMax) {
@@ -1458,8 +1459,8 @@ function checkVerbraucherSchleifenimpedanz(verteiler: Verteiler): { errors: Vali
         typ: 'schleifenimpedanz',
         komponenteId: verbraucher.id,
         komponenteName: verbraucher.name,
-        beschreibung: `Keine Schutzeinrichtung auf dem Pfad kann auslösen! Zs=${zsGesamt.toFixed(1)}mΩ`,
-        hinweis: `Schleifenimpedanz zu hoch. Nächste Schutzeinrichtung: ${schutz.name} (${schutz.charakteristik}${schutz.bemessungsStrom}) benötigt Zs < ${(zsMax * 1000).toFixed(1)}mΩ. Größeren Querschnitt verwenden!`,
+        beschreibung: `💡 Schleifenimpedanz zu hoch: Zs=${zsGesamt.toFixed(1)}mΩ`,
+        hinweis: `Nächste Schutzeinrichtung ${schutz.name} (${schutz.charakteristik}${schutz.bemessungsStrom}) benötigt Zs ≤ ${(zsMax * 1000).toFixed(1)}mΩ (2/3-Regel für 0,4s Abschaltzeit). Größeren Querschnitt verwenden oder Schutzeinrichtung anpassen!`,
         schweregrad: 'kritisch',
       });
     }
@@ -1487,37 +1488,6 @@ function checkVerbraucherSchleifenimpedanz(verteiler: Verteiler): { errors: Vali
             schweregrad: 'warnung',
           });
         }
-      }
-    }
-
-    // Prüfe 3/2-Regel mit der kleinsten Absicherung auf dem Pfad
-    if (schutzeinrichtungenAufPfad.length > 0) {
-      const kleinste = schutzeinrichtungenAufPfad.reduce((min, curr) =>
-        curr.bemessungsStrom < min.bemessungsStrom ? curr : min
-      );
-
-      let ausloeseFaktor = 5;
-      switch (kleinste.charakteristik) {
-        case 'B': ausloeseFaktor = 5; break;
-        case 'C': ausloeseFaktor = 10; break;
-        case 'D':
-        case 'K': ausloeseFaktor = 20; break;
-      }
-
-      const ausloesestrom = kleinste.bemessungsStrom * ausloeseFaktor;
-      const minKurzschlussstrom = ausloesestrom * 1.5; // 3/2-Regel
-      const zsMaxMit3Halbe = 230 / minKurzschlussstrom;
-
-      if (zsGesamtOhm > zsMaxMit3Halbe) {
-        errors.push({
-          id: uuidv4(),
-          typ: 'schleifenimpedanz',
-          komponenteId: verbraucher.id,
-          komponenteName: verbraucher.name,
-          beschreibung: `3/2-Regel nicht erfüllt: Zs=${zsGesamt.toFixed(1)}mΩ > ${(zsMaxMit3Halbe * 1000).toFixed(1)}mΩ`,
-          hinweis: `Kurzschlussstrom muss 1,5× den Auslösestrom der kleinsten Absicherung (${kleinste.name}: ${kleinste.charakteristik}${kleinste.bemessungsStrom}) erreichen!`,
-          schweregrad: 'kritisch',
-        });
       }
     }
   }

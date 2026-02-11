@@ -18,7 +18,7 @@
       "Bash(node test-drehfeldcheck.js:*)"
     ],
     "deny": [
-      "node_modules",
+      "Node_modules",
       "Git"
     ],
     "ask": []

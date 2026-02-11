@@ -13,28 +13,21 @@ interface IconProps {
 // LS-SCHALTER (Leitungsschutzschalter)
 // ==========================================
 export const LSSchalterIcon: React.FC<IconProps> = ({ width, height, polzahl = 1 }) => {
-  const poleWidth = width / polzahl;
+  const iconMap: Record<number, string> = {
+    1: '/Leitungsschutzschalter 1 polig.png',
+    2: '/Leitungsschutzschalter 2 polig.png',
+    3: '/Leitungsschutzschalter 3 polig.png',
+    4: '/Leitungsschutzschalter 4 polig.png',
+  };
+
+  const iconPath = iconMap[polzahl] || iconMap[1];
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      {Array.from({ length: polzahl }).map((_, i) => {
-        const x = i * poleWidth + poleWidth / 2;
-        return (
-          <g key={i}>
-            {/* Eingang oben */}
-            <line x1={x} y1={0} x2={x} y2={height * 0.15} stroke="#333" strokeWidth={2} />
-            {/* Schaltkontakt (schräge Linie) */}
-            <line x1={x} y1={height * 0.15} x2={x + 4} y2={height * 0.45} stroke="#333" strokeWidth={2} />
-            {/* Thermisches Auslöseelement (Rechteck) */}
-            <rect x={x - 3} y={height * 0.45} width={6} height={height * 0.15} fill="none" stroke="#333" strokeWidth={1.5} />
-            {/* Magnetisches Auslöseelement (Halbkreis) */}
-            <path d={`M ${x - 4} ${height * 0.65} A 4 4 0 0 1 ${x + 4} ${height * 0.65}`} fill="none" stroke="#333" strokeWidth={1.5} />
-            {/* Ausgang unten */}
-            <line x1={x} y1={height * 0.7} x2={x} y2={height} stroke="#333" strokeWidth={2} />
-          </g>
-        );
-      })}
-    </svg>
+    <img
+      src={iconPath}
+      alt={`Leitungsschutzschalter ${polzahl}-polig`}
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 };
 
@@ -42,33 +35,19 @@ export const LSSchalterIcon: React.FC<IconProps> = ({ width, height, polzahl = 1
 // FI-SCHALTER (Fehlerstrom-Schutzschalter)
 // ==========================================
 export const FISchalterIcon: React.FC<IconProps> = ({ width, height, polzahl = 4 }) => {
-  const poleWidth = width / polzahl;
+  const iconMap: Record<number, string> = {
+    2: '/RCD 2 Polig.png',
+    4: '/RCD 4 polig.png',
+  };
+
+  const iconPath = iconMap[polzahl] || iconMap[4];
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      {/* Summenstromwandler (großer Kreis) */}
-      <ellipse cx={width / 2} cy={height * 0.5} rx={width * 0.35} ry={height * 0.2} fill="none" stroke="#333" strokeWidth={1.5} />
-
-      {Array.from({ length: polzahl }).map((_, i) => {
-        const x = i * poleWidth + poleWidth / 2;
-        return (
-          <g key={i}>
-            {/* Eingang oben */}
-            <line x1={x} y1={0} x2={x} y2={height * 0.25} stroke="#333" strokeWidth={2} />
-            {/* Durch Wandler */}
-            <line x1={x} y1={height * 0.25} x2={x} y2={height * 0.75} stroke="#333" strokeWidth={2} />
-            {/* Schaltkontakt */}
-            <line x1={x} y1={height * 0.75} x2={x + 3} y2={height * 0.85} stroke="#333" strokeWidth={2} />
-            {/* Ausgang unten */}
-            <line x1={x} y1={height * 0.85} x2={x} y2={height} stroke="#333" strokeWidth={2} />
-          </g>
-        );
-      })}
-
-      {/* Auslöserelais */}
-      <rect x={width * 0.7} y={height * 0.4} width={width * 0.15} height={height * 0.2} fill="none" stroke="#333" strokeWidth={1} />
-      <text x={width * 0.77} y={height * 0.55} fontSize={6} fill="#333">T</text>
-    </svg>
+    <img
+      src={iconPath}
+      alt={`FI-Schalter ${polzahl}-polig`}
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 };
 
@@ -113,24 +92,11 @@ export const FILSKombiIcon: React.FC<IconProps> = ({ width, height, polzahl = 2 
 // ==========================================
 export const NHSicherungIcon: React.FC<IconProps> = ({ width, height }) => {
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      {/* 3 Sicherungseinsätze */}
-      {[0.2, 0.5, 0.8].map((pos, i) => {
-        const x = width * pos;
-        return (
-          <g key={i}>
-            {/* Eingang */}
-            <line x1={x} y1={0} x2={x} y2={height * 0.2} stroke="#333" strokeWidth={2} />
-            {/* Sicherungskörper (Rechteck) */}
-            <rect x={x - 6} y={height * 0.2} width={12} height={height * 0.6} fill="#f0f0f0" stroke="#333" strokeWidth={1.5} />
-            {/* Schmelzleiter */}
-            <line x1={x} y1={height * 0.3} x2={x} y2={height * 0.7} stroke="#333" strokeWidth={1} strokeDasharray="2,2" />
-            {/* Ausgang */}
-            <line x1={x} y1={height * 0.8} x2={x} y2={height} stroke="#333" strokeWidth={2} />
-          </g>
-        );
-      })}
-    </svg>
+    <img
+      src="/3 fach NH Sicherung.png"
+      alt="NH-Sicherung 3-fach"
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 };
 
@@ -138,20 +104,12 @@ export const NHSicherungIcon: React.FC<IconProps> = ({ width, height }) => {
 // SCHRAUB-SICHERUNG (Diazed/Neozed)
 // ==========================================
 export const SchraubSicherungIcon: React.FC<IconProps> = ({ width, height }) => {
-  const cx = width / 2;
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      {/* Eingang */}
-      <line x1={cx} y1={0} x2={cx} y2={height * 0.15} stroke="#333" strokeWidth={2} />
-      {/* Sicherungskopf (Kreis) */}
-      <circle cx={cx} cy={height * 0.35} r={Math.min(width, height) * 0.25} fill="#f0f0f0" stroke="#333" strokeWidth={1.5} />
-      {/* Schmelzleiter Symbol */}
-      <rect x={cx - 2} y={height * 0.25} width={4} height={height * 0.2} fill="none" stroke="#333" strokeWidth={1} />
-      {/* Gewinde/Sockel */}
-      <rect x={cx - 5} y={height * 0.55} width={10} height={height * 0.25} fill="#e0e0e0" stroke="#333" strokeWidth={1} />
-      {/* Ausgang */}
-      <line x1={cx} y1={height * 0.8} x2={cx} y2={height} stroke="#333" strokeWidth={2} />
-    </svg>
+    <img
+      src="/Schmelzsicherung 1fach.png"
+      alt="Schraub-Sicherung 1-fach"
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 };
 
@@ -159,31 +117,19 @@ export const SchraubSicherungIcon: React.FC<IconProps> = ({ width, height }) => 
 // NEOZED-SICHERUNG (1-polig oder 3-polig)
 // ==========================================
 export const NeozedSicherungIcon: React.FC<IconProps> = ({ width, height, polzahl = 1 }) => {
-  const poleWidth = width / polzahl;
+  const iconMap: Record<number, string> = {
+    1: '/Schmelzsicherung 1fach.png',
+    3: '/Schmelzsicherung 3 Fach.png',
+  };
+
+  const iconPath = iconMap[polzahl] || iconMap[1];
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      {Array.from({ length: polzahl }).map((_, i) => {
-        const cx = i * poleWidth + poleWidth / 2;
-        return (
-          <g key={i}>
-            {/* Eingang */}
-            <line x1={cx} y1={0} x2={cx} y2={height * 0.12} stroke="#333" strokeWidth={2} />
-            {/* Sicherungskopf (Kreis mit Kreuz) */}
-            <circle cx={cx} cy={height * 0.3} r={Math.min(poleWidth * 0.35, height * 0.15)} fill="#f5f5dc" stroke="#333" strokeWidth={1.5} />
-            {/* Kreuz im Sicherungskopf */}
-            <line x1={cx - 3} y1={height * 0.3} x2={cx + 3} y2={height * 0.3} stroke="#333" strokeWidth={1} />
-            <line x1={cx} y1={height * 0.3 - 3} x2={cx} y2={height * 0.3 + 3} stroke="#333" strokeWidth={1} />
-            {/* Sicherungskörper */}
-            <rect x={cx - 4} y={height * 0.45} width={8} height={height * 0.3} fill="#e8e8e8" stroke="#333" strokeWidth={1} rx={1} />
-            {/* Schmelzleiter (gestrichelt) */}
-            <line x1={cx} y1={height * 0.48} x2={cx} y2={height * 0.72} stroke="#333" strokeWidth={1} strokeDasharray="2,2" />
-            {/* Ausgang */}
-            <line x1={cx} y1={height * 0.75} x2={cx} y2={height} stroke="#333" strokeWidth={2} />
-          </g>
-        );
-      })}
-    </svg>
+    <img
+      src={iconPath}
+      alt={`Neozed-Sicherung ${polzahl}-fach`}
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 };
 

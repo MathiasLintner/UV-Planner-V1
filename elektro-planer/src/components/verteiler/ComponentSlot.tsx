@@ -222,7 +222,7 @@ function createComponentFromVariant(
       return {
         ...baseParams,
         type: 'versorgungsklemme',
-        spannung: (libItem.defaultParams as any).spannung || 400,
+        spannung: 400, // Immer 400V (Drehstrom) - nicht änderbar
         kurzschlussStrom: (libItem.defaultParams as any).kurzschlussStrom || 6,
         schleifenimpedanz: (libItem.defaultParams as any).schleifenimpedanz || 0.5,
         netzsystem: (libItem.defaultParams as any).netzsystem || 'TN-C-S',
