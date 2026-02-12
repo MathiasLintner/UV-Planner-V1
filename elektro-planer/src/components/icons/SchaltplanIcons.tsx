@@ -55,35 +55,21 @@ export const FISchalterIcon: React.FC<IconProps> = ({ width, height, polzahl = 4
 // FI/LS-KOMBINATION
 // ==========================================
 export const FILSKombiIcon: React.FC<IconProps> = ({ width, height, polzahl = 2 }) => {
-  const poleWidth = width / polzahl;
+  const iconMap: Record<number, string> = {
+    1: '/RCDLS 2 polig.png', // 1P+N verwendet 2-polig Icon
+    2: '/RCDLS 2 polig.png',
+    3: '/RCDLS 4polig.png',
+    4: '/RCDLS 4polig.png',
+  };
+
+  const iconPath = iconMap[polzahl] || iconMap[2];
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      {/* Summenstromwandler */}
-      <ellipse cx={width / 2} cy={height * 0.35} rx={width * 0.3} ry={height * 0.1} fill="none" stroke="#333" strokeWidth={1} />
-
-      {Array.from({ length: polzahl }).map((_, i) => {
-        const x = i * poleWidth + poleWidth / 2;
-        return (
-          <g key={i}>
-            {/* Eingang */}
-            <line x1={x} y1={0} x2={x} y2={height * 0.2} stroke="#333" strokeWidth={2} />
-            {/* Schaltkontakt FI */}
-            <line x1={x} y1={height * 0.2} x2={x + 2} y2={height * 0.35} stroke="#333" strokeWidth={1.5} />
-            {/* Durch Wandler */}
-            <line x1={x} y1={height * 0.35} x2={x} y2={height * 0.5} stroke="#333" strokeWidth={2} />
-            {/* Schaltkontakt LS */}
-            <line x1={x} y1={height * 0.5} x2={x + 3} y2={height * 0.65} stroke="#333" strokeWidth={1.5} />
-            {/* Thermisches Element */}
-            <rect x={x - 2} y={height * 0.65} width={4} height={height * 0.1} fill="none" stroke="#333" strokeWidth={1} />
-            {/* Magnetisches Element */}
-            <path d={`M ${x - 3} ${height * 0.78} A 3 3 0 0 1 ${x + 3} ${height * 0.78}`} fill="none" stroke="#333" strokeWidth={1} />
-            {/* Ausgang */}
-            <line x1={x} y1={height * 0.82} x2={x} y2={height} stroke="#333" strokeWidth={2} />
-          </g>
-        );
-      })}
-    </svg>
+    <img
+      src={iconPath}
+      alt={`FI/LS-Kombination ${polzahl}-polig`}
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 };
 

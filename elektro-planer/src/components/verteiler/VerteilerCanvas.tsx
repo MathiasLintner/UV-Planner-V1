@@ -20,9 +20,7 @@ export const VerteilerCanvas: React.FC = () => {
             <p className="text-sm text-gray-500 mt-1">{verteiler.beschreibung}</p>
           )}
           <div className="flex gap-4 mt-2 text-xs text-gray-400">
-            <span>Nennspannung: {verteiler.nennspannung}V</span>
             <span>Nennstrom: {verteiler.nennstrom}A</span>
-            <span>Ik: {verteiler.kurzschlussStrom}kA</span>
           </div>
         </div>
 

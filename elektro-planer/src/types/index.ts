@@ -165,7 +165,6 @@ export interface KlemmeParams extends BaseComponentParams {
 export interface VersorgungsklemmeParams extends BaseComponentParams {
   type: 'versorgungsklemme';
   spannung: number;             // Nennspannung [V] (230/400)
-  kurzschlussStrom: number;     // Ik [kA] am Einspeisepunkt
   schleifenimpedanz: number;    // Zs [Ω] Schleifenimpedanz
   netzsystem: Netzsystem;       // TN-C, TN-S, TN-C-S, TT, IT
 }
@@ -317,9 +316,7 @@ export interface Verteiler {
   komponenten: ElektroComponent[];
   verbraucher: Verbraucher[];
   verbindungen: Wire[];
-  nennspannung: number;         // [V]
   nennstrom: number;            // [A] Hauptsicherung
-  kurzschlussStrom: number;     // [kA] am Einspeisepunkt
 }
 
 // ==========================================
@@ -737,7 +734,6 @@ export const COMPONENT_LIBRARY: ComponentLibraryItem[] = [
     teilungseinheiten: 4,
     defaultParams: {
       spannung: 400,
-      kurzschlussStrom: 6,
       schleifenimpedanz: 0.5,
       netzsystem: 'TN-C-S',
     },

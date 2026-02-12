@@ -567,12 +567,12 @@ function checkSchleifenimpedanz(verteiler: Verteiler): ValidationError[] {
     const zsMax = (2 / 3) * (230 / ausloesestrom); // 2/3-Regel
 
     // Schleifenimpedanz am Einspeisepunkt:
-    // Priorität: 1. Schleifenimpedanz der Versorgungsklemme, 2. Aus Kurzschlussstrom berechnet
+    // Schleifenimpedanz aus Versorgungsklemme verwenden
     let zsVorgelagert: number;
     if (versorgungsklemme && (versorgungsklemme as any).schleifenimpedanz > 0) {
       zsVorgelagert = (versorgungsklemme as any).schleifenimpedanz; // Direkt in Ω
     } else {
-      zsVorgelagert = 230 / (verteiler.kurzschlussStrom * 1000); // Aus Kurzschlussstrom in Ω
+      zsVorgelagert = 0.5; // Standardwert falls keine Versorgungsklemme vorhanden
     }
 
     // Addiere Leitungsimpedanz (vereinfacht)
@@ -1116,19 +1116,8 @@ function checkFISelektivitaet(verteiler: Verteiler): { errors: ValidationError[]
             hinweis: `Die Vorsicherung (${schutz.bemessungsStrom}A) ist größer als der FI-Bemessungsstrom (${fi.bemessungsStrom}A). Bei Überlast könnte der FI beschädigt werden. Reduzieren Sie die Vorsicherung auf maximal ${fi.bemessungsStrom}A.`,
             schweregrad: 'warnung',
           });
-        } else if (schutz.bemessungsStrom < fi.bemessungsStrom) {
-          // Vorsicherung kleiner als FI-Bemessungsstrom -> Info
-          warnings.push({
-            id: uuidv4(),
-            typ: 'falsche-dimensionierung',
-            komponenteId: fi.id,
-            komponenteName: fi.name,
-            beschreibung: `Vorsicherung kleiner als FI: ${schutz.name} (${schutz.bemessungsStrom}A) < ${fi.name} (${fi.bemessungsStrom}A)`,
-            hinweis: `Die Vorsicherung (${schutz.bemessungsStrom}A) ist kleiner als der FI-Bemessungsstrom (${fi.bemessungsStrom}A). Der FI wird nicht voll ausgenutzt, was aber zulässig ist.`,
-            schweregrad: 'info',
-          });
         }
-        // Bei Gleichheit -> OK, keine Meldung
+        // Bei Vorsicherung <= FI -> OK, keine Meldung
       }
     } else if (versorgung) {
       // Keine Vorsicherung vorhanden - prüfe Versorgungsstrom
@@ -1136,19 +1125,9 @@ function checkFISelektivitaet(verteiler: Verteiler): { errors: ValidationError[]
 
       if (hatVerbindungZurVersorgung) {
         // FI hängt an der Versorgung ohne Vorsicherung
-        const versorgungsstrom = (versorgung as any).nennstrom || verteiler.nennstrom || 0;
+        const versorgungsstrom = verteiler.nennstrom || 0;
 
-        if (versorgungsstrom > 0 && versorgungsstrom < fi.bemessungsStrom) {
-          errors.push({
-            id: uuidv4(),
-            typ: 'falsche-dimensionierung',
-            komponenteId: fi.id,
-            komponenteName: fi.name,
-            beschreibung: `Keine Vorsicherung: Versorgungsstrom (${versorgungsstrom}A) < FI-Bemessungsstrom (${fi.bemessungsStrom}A)`,
-            hinweis: `Der FI-Schalter hat keine vorgelagerte Absicherung und der Bemessungsstrom der Versorgung (${versorgungsstrom}A) ist kleiner als der FI-Bemessungsstrom (${fi.bemessungsStrom}A). Fügen Sie eine passende Vorsicherung hinzu oder erhöhen Sie den Versorgungsstrom.`,
-            schweregrad: 'kritisch',
-          });
-        } else if (versorgungsstrom > 0 && versorgungsstrom > fi.bemessungsStrom) {
+        if (versorgungsstrom > 0 && versorgungsstrom > fi.bemessungsStrom) {
           // Versorgungsstrom > FI-Bemessungsstrom ohne Vorsicherung → Warnung
           warnings.push({
             id: uuidv4(),
@@ -1156,7 +1135,7 @@ function checkFISelektivitaet(verteiler: Verteiler): { errors: ValidationError[]
             komponenteId: fi.id,
             komponenteName: fi.name,
             beschreibung: `Keine Vorsicherung: Versorgungsstrom (${versorgungsstrom}A) > FI-Bemessungsstrom (${fi.bemessungsStrom}A)`,
-            hinweis: `Der FI-Schalter hat keine vorgelagerte Absicherung. Bei Überlast könnte der FI beschädigt werden. Es wird empfohlen, eine Vorsicherung mit mindestens ${fi.bemessungsStrom}A einzubauen.`,
+            hinweis: `Der FI-Schalter hat keine vorgelagerte Absicherung. Bei Überlast könnte der FI beschädigt werden. Es wird empfohlen, eine Vorsicherung mit maximal ${fi.bemessungsStrom}A einzubauen.`,
             schweregrad: 'warnung',
           });
         }
@@ -1544,7 +1523,7 @@ function berechneGesamtwerte(verteiler: Verteiler): ValidationResult['berechnung
   if (versorgungsklemme && (versorgungsklemme as any).schleifenimpedanz > 0) {
     schleifenimpedanz = (versorgungsklemme as any).schleifenimpedanz * 1000; // Ω zu mΩ
   } else {
-    schleifenimpedanz = (230 / (verteiler.kurzschlussStrom * 1000)) * 1000; // in mΩ
+    schleifenimpedanz = 0.5 * 1000; // Standardwert in mΩ (0.5 Ω)
   }
 
   return {
@@ -1569,12 +1548,12 @@ function berechneSchleifenimpedanzFuerVerbraucher(
   );
 
   // Schleifenimpedanz am Einspeisepunkt:
-  // Priorität: 1. Schleifenimpedanz der Versorgungsklemme, 2. Aus Kurzschlussstrom berechnet
+  // Schleifenimpedanz aus Versorgungsklemme verwenden
   let zsVorgelagert: number;
   if (versorgungsklemme && (versorgungsklemme as any).schleifenimpedanz > 0) {
     zsVorgelagert = (versorgungsklemme as any).schleifenimpedanz; // Direkt in Ω
   } else {
-    zsVorgelagert = 230 / (verteiler.kurzschlussStrom * 1000); // Aus Kurzschlussstrom in Ω
+    zsVorgelagert = 0.5; // Standardwert falls keine Versorgungsklemme vorhanden
   }
 
   // Wenn keine Leitungsdaten vorhanden, nur vorgelagerte Impedanz zurückgeben

@@ -32,7 +32,7 @@ interface AppState {
 
   // Aktionen - Verteiler
   setVerteiler: (verteiler: Verteiler) => void;
-  updateVerteilerInfo: (info: Partial<Pick<Verteiler, 'name' | 'beschreibung' | 'nennspannung' | 'nennstrom' | 'kurzschlussStrom'>>) => void;
+  updateVerteilerInfo: (info: Partial<Pick<Verteiler, 'name' | 'beschreibung' | 'nennstrom'>>) => void;
   addHutschiene: () => void;
   removeHutschiene: (index: number) => void;
 
@@ -95,9 +95,7 @@ const createEmptyVerteiler = (): Verteiler => ({
   komponenten: [],
   verbraucher: [],
   verbindungen: [],
-  nennspannung: 400,
   nennstrom: 63,
-  kurzschlussStrom: 6,
 });
 
 const createCustomVerteiler = (slots: number, schienen: number): Verteiler => ({
@@ -112,9 +110,7 @@ const createCustomVerteiler = (slots: number, schienen: number): Verteiler => ({
   komponenten: [],
   verbraucher: [],
   verbindungen: [],
-  nennspannung: 400,
   nennstrom: 63,
-  kurzschlussStrom: 6,
 });
 
 const initialUIState: UIState = {

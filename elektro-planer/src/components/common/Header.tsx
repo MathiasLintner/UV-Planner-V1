@@ -276,17 +276,6 @@ export const Header: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Nennspannung (V)</label>
-              <select
-                value={verteiler.nennspannung}
-                onChange={(e) => updateVerteilerInfo({ nennspannung: Number(e.target.value) })}
-                className="w-full px-2 py-1.5 border rounded text-sm"
-              >
-                <option value={230}>230V (1-phasig)</option>
-                <option value={400}>400V (3-phasig)</option>
-              </select>
-            </div>
-            <div>
               <label className="block text-xs text-gray-500 mb-1">Nennstrom (A)</label>
               <select
                 value={verteiler.nennstrom}
@@ -299,20 +288,6 @@ export const Header: React.FC = () => {
                 <option value={63}>63 A</option>
                 <option value={80}>80 A</option>
                 <option value={100}>100 A</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Kurzschlussstrom (kA)</label>
-              <select
-                value={verteiler.kurzschlussStrom}
-                onChange={(e) => updateVerteilerInfo({ kurzschlussStrom: Number(e.target.value) })}
-                className="w-full px-2 py-1.5 border rounded text-sm"
-              >
-                <option value={3}>3 kA</option>
-                <option value={6}>6 kA</option>
-                <option value={10}>10 kA</option>
-                <option value={15}>15 kA</option>
-                <option value={25}>25 kA</option>
               </select>
             </div>
           </div>

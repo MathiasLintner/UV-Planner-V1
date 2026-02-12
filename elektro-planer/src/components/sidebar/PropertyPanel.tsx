@@ -770,22 +770,6 @@ const VersorgungsklemmeProperties: React.FC<{
 }> = ({ component, onUpdate }) => (
   <div className="space-y-3">
     <PropertyInput
-      label="Kurzschlussstrom"
-      value={component.kurzschlussStrom}
-      unit="kA"
-      options={[
-        { value: 3, label: '3 kA' },
-        { value: 6, label: '6 kA' },
-        { value: 10, label: '10 kA' },
-        { value: 15, label: '15 kA' },
-        { value: 20, label: '20 kA' },
-        { value: 25, label: '25 kA' },
-        { value: 35, label: '35 kA' },
-        { value: 50, label: '50 kA' },
-      ]}
-      onChange={(v) => onUpdate({ kurzschlussStrom: v })}
-    />
-    <PropertyInput
       label="Schleifenimpedanz"
       value={component.schleifenimpedanz}
       unit="Ω"

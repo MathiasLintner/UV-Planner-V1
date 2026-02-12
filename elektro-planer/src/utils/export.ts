@@ -39,9 +39,7 @@ export async function exportToPDF(verteiler: Verteiler): Promise<void> {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   const techData = [
-    `Nennspannung: ${verteiler.nennspannung} V`,
     `Nennstrom: ${verteiler.nennstrom} A`,
-    `Kurzschlussstrom: ${verteiler.kurzschlussStrom} kA`,
     `Anzahl Hutschienen: ${verteiler.hutschienen.length}`,
   ];
   techData.forEach((line) => {
@@ -187,9 +185,7 @@ export function exportToExcel(verteiler: Verteiler): void {
     [],
     ['Verteiler-Name:', verteiler.name],
     ['Beschreibung:', verteiler.beschreibung || '-'],
-    ['Nennspannung:', `${verteiler.nennspannung} V`],
     ['Nennstrom:', `${verteiler.nennstrom} A`],
-    ['Kurzschlussstrom:', `${verteiler.kurzschlussStrom} kA`],
     ['Anzahl Hutschienen:', verteiler.hutschienen.length],
     ['Anzahl Komponenten:', verteiler.komponenten.length],
     ['Anzahl Verbraucher:', verteiler.verbraucher.length],
@@ -452,7 +448,6 @@ function getDetailedParams(comp: ElektroComponent): (string | number)[] {
     case 'versorgungsklemme':
       return [
         `${comp.spannung} V`,
-        `${comp.kurzschlussStrom} kA`,
         `${comp.schleifenimpedanz} Ω`,
         comp.netzsystem
       ];
