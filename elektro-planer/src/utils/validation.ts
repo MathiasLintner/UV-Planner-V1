@@ -1219,8 +1219,9 @@ function checkErsteSicherungGroesserVersorgung(verteiler: Verteiler): Validation
   // Sammle alle direkt verbundenen Komponenten
   const direktVerbundeneIds = new Set(direkteVerbindungen.map(w => w.nach.componentId));
 
-  // Schutzeinrichtungs-Typen die als erste Sicherung gelten
-  const sicherungsTypen = ['ls-schalter', 'fi-ls-kombi', 'nh-sicherung', 'neozed-sicherung', 'schraub-sicherung', 'fi-schalter'];
+  // Schutzeinrichtungs-Typen die als erste Sicherung gelten (nur Überstromschutz!)
+  // WICHTIG: FI-Schalter sind KEINE Überstromsicherungen, sondern nur Fehlerstromschutz
+  const sicherungsTypen = ['ls-schalter', 'fi-ls-kombi', 'nh-sicherung', 'neozed-sicherung', 'schraub-sicherung'];
 
   for (const kompId of direktVerbundeneIds) {
     const komponente = verteiler.komponenten.find(k => k.id === kompId);
