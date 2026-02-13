@@ -229,9 +229,9 @@ export const PlacedComponent: React.FC<PlacedComponentProps> = ({
 
       <div
         className="absolute flex items-center justify-center overflow-hidden"
-        style={{ top: '14px', left: '2px', right: '2px', bottom: '24px' }}
+        style={{ top: '1px', left: '2px', right: '2px', bottom: '20px' }}
       >
-        {getComponentIcon(component, Math.max(componentWidth - 6, 12), Math.max(COMPONENT_HEIGHT - 42, 30))}
+        {getComponentIcon(component, Math.max(componentWidth - 5, 12), Math.max(COMPONENT_HEIGHT - 35, 35))}
       </div>
 
       <div

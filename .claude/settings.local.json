@@ -15,7 +15,8 @@
       "Bash(dir:*)",
       "Bash(node test-ueberstrom.js:*)",
       "Bash(node test-stromberechnung.js:*)",
-      "Bash(node test-drehfeldcheck.js:*)"
+      "Bash(node test-drehfeldcheck.js:*)",
+      "Bash(ls:*)"
     ],
     "deny": [
       "Node_modules",

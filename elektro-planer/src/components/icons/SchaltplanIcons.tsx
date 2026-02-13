@@ -120,29 +120,25 @@ export const NeozedSicherungIcon: React.FC<IconProps> = ({ width, height, polzah
 };
 
 // ==========================================
-// SAMMELSCHIENE
+// SAMMELSCHIENE / VERTEILERKLEMME
 // ==========================================
 export const SammelSchieneIcon: React.FC<IconProps & { phase: Phase }> = ({ width, height, phase }) => {
-  const color = PHASE_COLORS[phase];
+  const iconMap: Record<Phase, string> = {
+    L1: '/Verteilerklemme L.png',
+    L2: '/Verteilerklemme L.png', // Verwende L-Icon für alle Außenleiter
+    L3: '/Verteilerklemme L.png',
+    N: '/Verteilerklemme N.png',
+    PE: '/Verteilerklemme PE.png',
+  };
+
+  const iconPath = iconMap[phase];
+
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      {/* Schiene */}
-      <rect x={2} y={height * 0.4} width={width - 4} height={height * 0.2} fill={color} stroke="#333" strokeWidth={1} />
-      {/* Anschlusspunkte oben */}
-      {Array.from({ length: Math.floor(width / 15) }).map((_, i) => (
-        <g key={`top-${i}`}>
-          <line x1={10 + i * 15} y1={0} x2={10 + i * 15} y2={height * 0.4} stroke={color} strokeWidth={2} />
-          <circle cx={10 + i * 15} cy={height * 0.1} r={3} fill={color} stroke="#333" strokeWidth={1} />
-        </g>
-      ))}
-      {/* Anschlusspunkte unten */}
-      {Array.from({ length: Math.floor(width / 15) }).map((_, i) => (
-        <g key={`bottom-${i}`}>
-          <line x1={10 + i * 15} y1={height * 0.6} x2={10 + i * 15} y2={height} stroke={color} strokeWidth={2} />
-          <circle cx={10 + i * 15} cy={height * 0.9} r={3} fill={color} stroke="#333" strokeWidth={1} />
-        </g>
-      ))}
-    </svg>
+    <img
+      src={iconPath}
+      alt={`Sammelschiene ${phase}`}
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 };
 
@@ -226,32 +222,15 @@ export const KlemmeIcon: React.FC<IconProps & { phase: Phase }> = ({ width, heig
 };
 
 // ==========================================
-// VERSORGUNGSANSCHLUSSKLEMME
+// VERSORGUNGSANSCHLUSSKLEMME (5-polig)
 // ==========================================
 export const VersorgungsklemmeIcon: React.FC<IconProps> = ({ width, height }) => {
-  const phases: Phase[] = ['L1', 'L2', 'L3', 'N', 'PE'];
-  const poleWidth = width / 5;
-
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      {/* Netz-Symbol oben */}
-      <rect x={2} y={2} width={width - 4} height={height * 0.25} fill="#ffe4b5" stroke="#333" strokeWidth={1.5} rx={2} />
-      <text x={width / 2} y={height * 0.18} textAnchor="middle" fontSize={8} fill="#333" fontWeight="bold">NETZ</text>
-
-      {/* 5 Ausgänge unten (L1, L2, L3, N, PE) */}
-      {phases.map((phase, i) => {
-        const x = i * poleWidth + poleWidth / 2;
-        const color = PHASE_COLORS[phase];
-        return (
-          <g key={phase}>
-            <line x1={x} y1={height * 0.3} x2={x} y2={height * 0.5} stroke="#333" strokeWidth={1.5} />
-            <rect x={x - 4} y={height * 0.5} width={8} height={height * 0.25} fill="#f5f5f5" stroke="#333" strokeWidth={1} />
-            <line x1={x} y1={height * 0.75} x2={x} y2={height} stroke={color} strokeWidth={2} />
-            <circle cx={x} cy={height * 0.9} r={3} fill={color} stroke="#333" strokeWidth={1} />
-          </g>
-        );
-      })}
-    </svg>
+    <img
+      src="/Abgangsklemm 5 polig.png"
+      alt="Versorgungsklemme 5-polig"
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 };
 
@@ -259,32 +238,19 @@ export const VersorgungsklemmeIcon: React.FC<IconProps> = ({ width, height }) =>
 // ABGANGSKLEMME (3-polig oder 5-polig)
 // ==========================================
 export const AbgangsklemmeIcon: React.FC<IconProps> = ({ width, height, polzahl = 3 }) => {
-  const phases: Phase[] = polzahl === 3 ? ['L1', 'N', 'PE'] : ['L1', 'L2', 'L3', 'N', 'PE'];
-  const poleWidth = width / polzahl;
+  const iconMap: Record<number, string> = {
+    3: '/Abgangsklemm 3 polig.png',
+    5: '/Abgangsklemm 5 polig.png',
+  };
+
+  const iconPath = iconMap[polzahl] || iconMap[3];
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      {/* Klemmenblock */}
-      <rect x={2} y={height * 0.3} width={width - 4} height={height * 0.4} fill="#e8e8e8" stroke="#333" strokeWidth={1.5} rx={1} />
-
-      {phases.map((phase, i) => {
-        const x = i * poleWidth + poleWidth / 2;
-        const color = PHASE_COLORS[phase];
-        return (
-          <g key={phase}>
-            {/* Eingang oben */}
-            <line x1={x} y1={0} x2={x} y2={height * 0.3} stroke={color} strokeWidth={2} />
-            <circle cx={x} cy={height * 0.15} r={2} fill={color} stroke="#333" strokeWidth={1} />
-            {/* Klemmverbindung */}
-            <line x1={x} y1={height * 0.35} x2={x} y2={height * 0.65} stroke={color} strokeWidth={2} />
-            <circle cx={x} cy={height * 0.5} r={2.5} fill={color} stroke="#333" strokeWidth={1} />
-            {/* Ausgang unten */}
-            <line x1={x} y1={height * 0.7} x2={x} y2={height} stroke={color} strokeWidth={2} />
-            <circle cx={x} cy={height * 0.85} r={2} fill={color} stroke="#333" strokeWidth={1} />
-          </g>
-        );
-      })}
-    </svg>
+    <img
+      src={iconPath}
+      alt={`Abgangsklemme ${polzahl}-polig`}
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 };
 
