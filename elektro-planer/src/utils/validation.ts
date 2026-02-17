@@ -208,11 +208,7 @@ export function validateVerteiler(verteiler: Verteiler): ValidationResult {
   const schleifenimpedanzFehler = checkSchleifenimpedanz(verteiler);
   errors.push(...schleifenimpedanzFehler);
 
-  // 6. Prüfe Phasensymmetrie
-  const phasensymmetrieFehler = checkPhasensymmetrie(verteiler);
-  warnings.push(...phasensymmetrieFehler);
-
-  // 7. Prüfe fehlende Verbindungen
+  // 6. Prüfe fehlende Verbindungen
   const verbindungsFehler = checkVerbindungen(verteiler);
   warnings.push(...verbindungsFehler);
 
@@ -235,8 +231,8 @@ export function validateVerteiler(verteiler: Verteiler): ValidationResult {
   warnings.push(...verbraucherSchleifenimpedanzFehler.warnings);
 
   // 12. Prüfe Steckdosen auf FI-Schutz (30mA)
-  const steckdosenFIWarnung = checkSteckdosenFISchutz(verteiler);
-  warnings.push(...steckdosenFIWarnung);
+  const steckdosenFIFehler = checkSteckdosenFISchutz(verteiler);
+  errors.push(...steckdosenFIFehler);
 
   // 13. Prüfe FI-Selektivität bei Reihenschaltung
   const fiSelektivitaetFehler = checkFISelektivitaet(verteiler);
@@ -446,7 +442,8 @@ function checkSpannungsfall(verteiler: Verteiler): { errors: ValidationError[]; 
     // Berechne Strom des Verbrauchers (mit √3 für Drehstrom)
     const spannung = verbraucher.spannung;
     const leistung = verbraucher.leistung * verbraucher.gleichzeitigkeitsfaktor;
-    const strom = berechneVerbraucherStrom(leistung, spannung, verbraucher.phasen);
+    const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
+    const strom = berechneVerbraucherStrom(leistung, spannung, effectivePhasen);
 
     // Leitungswiderstand berechnen (Cu-Leitung angenommen)
     const rho = RHO_KUPFER;
@@ -763,7 +760,8 @@ function checkVerbraucherMehrfachFISpeisung(verteiler: Verteiler): ValidationErr
     const nearestFIs = findNearestFIPerPhase(verteiler, zugewieseneKomponente.id);
 
     // Sammle welche Phasen der Verbraucher braucht (immer mit N)
-    const zuPruefendePhasen: Phase[] = [...verbraucher.phasen];
+    const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
+    const zuPruefendePhasen: Phase[] = [...effectivePhasen];
     if (!zuPruefendePhasen.includes('N')) {
       zuPruefendePhasen.push('N'); // Neutralleiter ist immer relevant
     }
@@ -947,7 +945,8 @@ function checkVerbraucherDrehfeld(verteiler: Verteiler): ValidationError[] {
     if (!verbraucher.zugewieseneKomponente) continue;
 
     // Prüfe nur 3-phasige Drehstromverbraucher (L1, L2, L3)
-    const phasenAnzahl = verbraucher.phasen.filter(p => p !== 'N' && p !== 'PE').length;
+    const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
+    const phasenAnzahl = effectivePhasen.filter(p => p !== 'N' && p !== 'PE').length;
     if (phasenAnzahl !== 3) continue;
 
     const zugewieseneKomponente = verteiler.komponenten.find(
@@ -1010,7 +1009,7 @@ function checkSteckdosenFISchutz(verteiler: Verteiler): ValidationError[] {
         komponenteName: verbraucher.name,
         beschreibung: `Steckdose ohne FI-Schutz mit max. 30mA`,
         hinweis: 'Steckdosen müssen gemäß ÖVE/ÖNORM durch einen FI-Schalter mit IΔn ≤ 30mA geschützt werden.',
-        schweregrad: 'warnung',
+        schweregrad: 'fehler',
       });
     }
   }
@@ -1492,8 +1491,9 @@ function berechneGesamtwerte(verteiler: Verteiler): ValidationResult['berechnung
   };
 
   for (const verbraucher of verteiler.verbraucher) {
-    const lastProPhase = (verbraucher.leistung * verbraucher.gleichzeitigkeitsfaktor) / verbraucher.phasen.length;
-    for (const phase of verbraucher.phasen) {
+    const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
+    const lastProPhase = (verbraucher.leistung * verbraucher.gleichzeitigkeitsfaktor) / effectivePhasen.length;
+    for (const phase of effectivePhasen) {
       if (phase in phasenLasten) {
         phasenLasten[phase] += lastProPhase;
       }
@@ -1608,7 +1608,8 @@ function erstelleStromkreisErgebnisse(
   for (const verbraucher of verteiler.verbraucher) {
     // Berechne Strom und Leistung (mit √3 für Drehstrom)
     const leistung = verbraucher.leistung * verbraucher.gleichzeitigkeitsfaktor;
-    const strom = berechneVerbraucherStrom(leistung, verbraucher.spannung, verbraucher.phasen);
+    const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
+    const strom = berechneVerbraucherStrom(leistung, verbraucher.spannung, effectivePhasen);
 
     // Spannungsfall berechnen (wenn Leitungsdaten vorhanden)
     let spannungsfall: number | undefined;
@@ -1718,7 +1719,8 @@ function checkVerbraucherUeberstrom(verteiler: Verteiler): ValidationError[] {
     // Berechne den Strom des Verbrauchers (mit √3 für Drehstrom)
     const leistung = verbraucher.leistung * verbraucher.gleichzeitigkeitsfaktor;
     const spannung = verbraucher.spannung;
-    const verbraucherStrom = berechneVerbraucherStrom(leistung, spannung, verbraucher.phasen);
+    const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
+    const verbraucherStrom = berechneVerbraucherStrom(leistung, spannung, effectivePhasen);
 
     // Finde die zugewiesene Schutzeinrichtung
     const zugewieseneKomponente = verteiler.komponenten.find(

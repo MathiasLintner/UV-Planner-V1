@@ -11,10 +11,7 @@ const VERBRAUCHER_ICONS: Record<VerbraucherTyp, string> = {
   steckdose: '🔌',
   herd: '🍳',
   backofen: '🥧',
-  kuehlschrank: '🧊',
-  waschmaschine: '🧺',
   trockner: '👕',
-  geschirrspueler: '🍽️',
   warmwasser: '🚿',
   heizung: '🔥',
   klimaanlage: '❄️',
@@ -30,6 +27,10 @@ export const VerbraucherPanel: React.FC = () => {
     name: '',
     phasen: ['L1'],
     gleichzeitigkeitsfaktor: 1,
+    leitungslaenge: 20,
+    leitungsquerschnitt: 2.5,
+    verlegeart: 'B1',
+    leitermaterial: 'kupfer',
   });
 
   const handleAddVerbraucher = () => {
@@ -44,10 +45,11 @@ export const VerbraucherPanel: React.FC = () => {
       spannung: newVerbraucher.spannung || defaults.spannung,
       phasen: newVerbraucher.phasen as Phase[],
       gleichzeitigkeitsfaktor: newVerbraucher.gleichzeitigkeitsfaktor || 1,
-      leitungslaenge: 20,      // Default: 20 Meter
-      leitungsquerschnitt: 2.5, // Default: 2,5 mm²
-      verlegeart: 'B1',        // Default: B1 (Rohr auf/in Wand)
-      leitermaterial: 'kupfer', // Default: Kupfer
+      leitungslaenge: newVerbraucher.leitungslaenge || 20,
+      leitungsquerschnitt: newVerbraucher.leitungsquerschnitt || 2.5,
+      verlegeart: newVerbraucher.verlegeart as Verlegeart || 'B1',
+      leitermaterial: newVerbraucher.leitermaterial as Leitermaterial || 'kupfer',
+      zugewieseneKomponente: newVerbraucher.zugewieseneKomponente,
     };
 
     addVerbraucher(verbraucher);
@@ -56,6 +58,10 @@ export const VerbraucherPanel: React.FC = () => {
       name: '',
       phasen: ['L1'],
       gleichzeitigkeitsfaktor: 1,
+      leitungslaenge: 20,
+      leitungsquerschnitt: 2.5,
+      verlegeart: 'B1',
+      leitermaterial: 'kupfer',
     });
     setIsAdding(false);
   };
@@ -120,6 +126,35 @@ export const VerbraucherPanel: React.FC = () => {
             />
           </div>
 
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Zuweisung</label>
+            <select
+              value={newVerbraucher.zugewieseneKomponente || ''}
+              onChange={(e) => setNewVerbraucher({ ...newVerbraucher, zugewieseneKomponente: e.target.value || undefined })}
+              className="w-full px-2 py-1.5 border rounded text-sm"
+            >
+              <option value="">-- Nicht zugewiesen --</option>
+              {verteiler.komponenten
+                .filter((c) => c.type === 'abgangsklemme')
+                .map((s) => {
+                  const polzahl = (s as any).polzahl || 3;
+                  const ist3PolKlemme = polzahl === 3;
+                  const istDrehstromVerbraucher = newVerbraucher.spannung === 400;
+                  const geeignet = !(ist3PolKlemme && istDrehstromVerbraucher);
+                  return (
+                    <option
+                      key={s.id}
+                      value={s.id}
+                      disabled={!geeignet}
+                      className={!geeignet ? 'text-gray-400' : ''}
+                    >
+                      {s.name} ({polzahl}-polig){!geeignet ? ' - ungeeignet' : ''}
+                    </option>
+                  );
+                })}
+            </select>
+          </div>
+
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs text-gray-500 mb-1">Leistung (W)</label>
@@ -147,19 +182,76 @@ export const VerbraucherPanel: React.FC = () => {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">GZF</label>
+              <input
+                type="number"
+                min="0"
+                max="1"
+                step="0.1"
+                value={newVerbraucher.gleichzeitigkeitsfaktor}
+                onChange={(e) => setNewVerbraucher({ ...newVerbraucher, gleichzeitigkeitsfaktor: Number(e.target.value) })}
+                className="w-full px-2 py-1.5 border rounded text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Leitungslänge (m)</label>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={newVerbraucher.leitungslaenge || ''}
+                onChange={(e) => setNewVerbraucher({ ...newVerbraucher, leitungslaenge: e.target.value ? Number(e.target.value) : undefined })}
+                placeholder="z.B. 15"
+                className="w-full px-2 py-1.5 border rounded text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Querschnitt (mm²)</label>
+              <select
+                value={newVerbraucher.leitungsquerschnitt || ''}
+                onChange={(e) => setNewVerbraucher({ ...newVerbraucher, leitungsquerschnitt: e.target.value ? Number(e.target.value) : undefined })}
+                className="w-full px-2 py-1.5 border rounded text-sm"
+              >
+                <option value="">-- Auswählen --</option>
+                {VERFUEGBARE_QUERSCHNITTE.map((q) => (
+                  <option key={q} value={q}>
+                    {q} mm²
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Leitermaterial</label>
+              <select
+                value={newVerbraucher.leitermaterial || 'kupfer'}
+                onChange={(e) => setNewVerbraucher({ ...newVerbraucher, leitermaterial: e.target.value as Leitermaterial })}
+                className="w-full px-2 py-1.5 border rounded text-sm"
+              >
+                <option value="kupfer">Kupfer</option>
+                <option value="aluminium">Aluminium</option>
+              </select>
+            </div>
+          </div>
+
           <div>
-            <label className="block text-xs text-gray-500 mb-1">
-              Gleichzeitigkeitsfaktor ({(newVerbraucher.gleichzeitigkeitsfaktor || 1) * 100}%)
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={newVerbraucher.gleichzeitigkeitsfaktor}
-              onChange={(e) => setNewVerbraucher({ ...newVerbraucher, gleichzeitigkeitsfaktor: Number(e.target.value) })}
-              className="w-full"
-            />
+            <label className="block text-xs text-gray-500 mb-1">Verlegeart</label>
+            <select
+              value={newVerbraucher.verlegeart || 'B1'}
+              onChange={(e) => setNewVerbraucher({ ...newVerbraucher, verlegeart: e.target.value as Verlegeart })}
+              className="w-full px-2 py-1.5 border rounded text-sm"
+              title={newVerbraucher.verlegeart ? VERLEGEART_BESCHREIBUNGEN[newVerbraucher.verlegeart as Verlegeart] : ''}
+            >
+              {(Object.keys(VERLEGEART_BESCHREIBUNGEN) as Verlegeart[]).map((art) => (
+                <option key={art} value={art} title={VERLEGEART_BESCHREIBUNGEN[art]}>
+                  {art} - {VERLEGEART_BESCHREIBUNGEN[art].substring(0, 30)}...
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex gap-2">

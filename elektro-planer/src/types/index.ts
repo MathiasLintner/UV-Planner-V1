@@ -212,10 +212,7 @@ export type VerbraucherTyp =
   | 'steckdose'
   | 'herd'
   | 'backofen'
-  | 'kuehlschrank'
-  | 'waschmaschine'
   | 'trockner'
-  | 'geschirrspueler'
   | 'warmwasser'
   | 'heizung'
   | 'klimaanlage'
@@ -244,10 +241,7 @@ export const VERBRAUCHER_DEFAULTS: Record<VerbraucherTyp, { leistung: number; sp
   steckdose: { leistung: 3680, spannung: 230 },
   herd: { leistung: 11000, spannung: 400 },
   backofen: { leistung: 3500, spannung: 230 },
-  kuehlschrank: { leistung: 150, spannung: 230 },
-  waschmaschine: { leistung: 2200, spannung: 230 },
   trockner: { leistung: 2500, spannung: 230 },
-  geschirrspueler: { leistung: 2200, spannung: 230 },
   warmwasser: { leistung: 2000, spannung: 230 },
   heizung: { leistung: 2000, spannung: 230 },
   klimaanlage: { leistung: 3000, spannung: 230 },
