@@ -1293,10 +1293,12 @@ export function findNearestFIPerPhase(
   const terminalParentMap = buildTerminalParentMap(verteiler);
 
   // Mapping von Phase zu Terminal-Suffix
+  // Fallback auf L1-Terminals für L2/L3: Eine 3-polige Abgangsklemme verwendet immer IN_L1/OUT_L1
+  // als aktiven Terminal, unabhängig davon, ob die tatsächliche Phase L1, L2 oder L3 ist.
   const phaseToTerminals: Record<Phase, string[]> = {
     'L1': ['OUT_L1', 'IN_L1', 'BOT_0', 'TOP_0'],
-    'L2': ['OUT_L2', 'IN_L2', 'BOT_1', 'TOP_1'],
-    'L3': ['OUT_L3', 'IN_L3', 'BOT_2', 'TOP_2'],
+    'L2': ['OUT_L2', 'IN_L2', 'BOT_1', 'TOP_1', 'OUT_L1', 'IN_L1'],
+    'L3': ['OUT_L3', 'IN_L3', 'BOT_2', 'TOP_2', 'OUT_L1', 'IN_L1'],
     'N': ['OUT_N', 'IN_N'],
     'PE': ['OUT_PE', 'IN_PE'],
   };
@@ -1353,14 +1355,19 @@ function componentHasPhase(component: ElektroComponent, phase: Phase): boolean {
   if (component.type === 'fi-schalter') {
     const fi = component as FISchalterParams;
     if (fi.polzahl === 2) {
-      return phase === 'L1' || phase === 'N';
+      // 2-polig schützt EINEN Außenleiter + N. Welcher Außenleiter (L1, L2 oder L3)
+      // wird durch die Verdrahtung bestimmt – der Terminal heißt intern immer L1,
+      // daher wird hier jeder Außenleiter akzeptiert.
+      return phase === 'L1' || phase === 'L2' || phase === 'L3' || phase === 'N';
     } else if (fi.polzahl === 4) {
       return phase === 'L1' || phase === 'L2' || phase === 'L3' || phase === 'N';
     }
   } else if (component.type === 'fi-ls-kombi') {
     const fils = component as FILSKombiParams;
     if (fils.polzahl === 1 || fils.polzahl === 2) {
-      return phase === 'L1' || phase === 'N';
+      // Gleiche Logik wie 2-poliger FI: Terminal heißt intern L1, schützt aber
+      // den tatsächlich angeschlossenen Außenleiter (L1, L2 oder L3).
+      return phase === 'L1' || phase === 'L2' || phase === 'L3' || phase === 'N';
     } else {
       return phase === 'L1' || phase === 'L2' || phase === 'L3' || phase === 'N';
     }

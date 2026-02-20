@@ -1373,19 +1373,8 @@ function checkVerbraucherSchleifenimpedanz(verteiler: Verteiler): { errors: Vali
   const warnings: ValidationError[] = [];
 
   for (const verbraucher of verteiler.verbraucher) {
-    // Überspringe Verbraucher ohne Zuweisung
-    if (!verbraucher.zugewieseneKomponente) {
-      warnings.push({
-        id: uuidv4(),
-        typ: 'schleifenimpedanz',
-        komponenteId: verbraucher.id,
-        komponenteName: verbraucher.name,
-        beschreibung: 'Verbraucher ist keiner Schutzeinrichtung zugewiesen',
-        hinweis: 'Weisen Sie den Verbraucher einem LS-Schalter oder FI/LS zu.',
-        schweregrad: 'warnung',
-      });
-      continue;
-    }
+    // Überspringe Verbraucher ohne Zuweisung (Warnung kommt bereits von checkVerbindungen)
+    if (!verbraucher.zugewieseneKomponente) continue;
 
     const startKomponente = verteiler.komponenten.find(k => k.id === verbraucher.zugewieseneKomponente);
     if (!startKomponente) continue;
