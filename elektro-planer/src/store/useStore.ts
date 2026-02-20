@@ -232,19 +232,21 @@ export const useStore = create<AppState>()(
         let updatedKomponenten = state.verteiler.komponenten;
         let updatedVerbraucher = state.verteiler.verbraucher;
 
-        if ('zugewieseneKomponente' in updates && oldComponentId !== newComponentId && newComponentId) {
-          // Finde den bisherigen Verbraucher auf der neuen Komponente (falls vorhanden)
-          const newKlemme = state.verteiler.komponenten.find(k => k.id === newComponentId);
-          if (newKlemme && newKlemme.type === 'abgangsklemme') {
-            const bisherigZugewiesene = (newKlemme as any).zugewieseneVerbraucher || [];
-            // Entferne die Zuweisung vom bisherigen Verbraucher
-            if (bisherigZugewiesene.length > 0) {
-              updatedVerbraucher = state.verteiler.verbraucher.map((v) => {
-                if (bisherigZugewiesene.includes(v.id) && v.id !== id) {
-                  return { ...v, zugewieseneKomponente: undefined };
-                }
-                return v;
-              });
+        if ('zugewieseneKomponente' in updates && oldComponentId !== newComponentId) {
+          if (newComponentId) {
+            // Finde den bisherigen Verbraucher auf der neuen Komponente (falls vorhanden)
+            const newKlemme = state.verteiler.komponenten.find(k => k.id === newComponentId);
+            if (newKlemme && newKlemme.type === 'abgangsklemme') {
+              const bisherigZugewiesene = (newKlemme as any).zugewieseneVerbraucher || [];
+              // Entferne die Zuweisung vom bisherigen Verbraucher
+              if (bisherigZugewiesene.length > 0) {
+                updatedVerbraucher = state.verteiler.verbraucher.map((v) => {
+                  if (bisherigZugewiesene.includes(v.id) && v.id !== id) {
+                    return { ...v, zugewieseneKomponente: undefined };
+                  }
+                  return v;
+                });
+              }
             }
           }
 
@@ -254,7 +256,7 @@ export const useStore = create<AppState>()(
               const klemme = k as any;
               const zugewieseneVerbraucher = klemme.zugewieseneVerbraucher || [];
 
-              // Von alter Komponente entfernen
+              // Von alter Komponente entfernen (auch beim Aufheben der Zuweisung)
               if (k.id === oldComponentId) {
                 return {
                   ...k,
@@ -263,7 +265,7 @@ export const useStore = create<AppState>()(
               }
 
               // Zur neuen Komponente hinzufügen (nur dieser eine Verbraucher)
-              if (k.id === newComponentId) {
+              if (newComponentId && k.id === newComponentId) {
                 return {
                   ...k,
                   zugewieseneVerbraucher: [id], // Nur ein Verbraucher pro Klemme!

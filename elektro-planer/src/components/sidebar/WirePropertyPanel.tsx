@@ -127,6 +127,14 @@ export const WirePropertyPanel: React.FC = () => {
               </div>
             </div>
           )}
+          {selectedWire.phase === 'N' && selectedWire.stromWinkel !== undefined && (
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Stromwinkel (N-Phasor)</label>
+              <div className="font-semibold text-purple-700 text-lg">
+                {selectedWire.stromWinkel.toFixed(1)}°
+              </div>
+            </div>
+          )}
           <div className="text-xs text-gray-500">
             (Wird bei Validierung berechnet)
           </div>

@@ -119,7 +119,7 @@ export const ValidationPanel: React.FC = () => {
             <div className="mt-3 pt-3 border-t">
               <h5 className="text-xs text-gray-500 mb-2">Phasenlasten</h5>
               <div className="space-y-1">
-                {(['L1', 'L2', 'L3'] as const).map((phase) => {
+                {(['L1', 'L2', 'L3', 'N'] as const).map((phase) => {
                   const last = validationResult.berechnungen.phasenLasten[phase];
                   const maxLast = Math.max(
                     validationResult.berechnungen.phasenLasten.L1,
@@ -136,6 +136,7 @@ export const ValidationPanel: React.FC = () => {
                           className={`h-2 rounded-full ${
                             phase === 'L1' ? 'bg-amber-700' :
                             phase === 'L2' ? 'bg-gray-800' :
+                            phase === 'N' ? 'bg-blue-500' :
                             'bg-gray-500'
                           }`}
                           style={{ width: `${prozent}%` }}

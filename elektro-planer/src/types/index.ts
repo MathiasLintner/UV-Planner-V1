@@ -227,6 +227,7 @@ export interface Verbraucher {
   spannung: number;             // [V]
   phasen: Phase[];              // Angeschlossene Phasen
   gleichzeitigkeitsfaktor: number; // 0-1
+  cosPhi: number;               // Leistungsfaktor (0.1 - 1.0), Default: 1.0
   gruppe?: string;              // Optionale Gruppierung
   zugewieseneKomponente?: string; // ID der zugewiesenen Schutzeinrichtung (LS oder Abgangsklemme)
   leitungslaenge?: number;      // Leitungslänge in [m]
@@ -236,17 +237,17 @@ export interface Verbraucher {
 }
 
 // Default-Werte für Verbraucher
-export const VERBRAUCHER_DEFAULTS: Record<VerbraucherTyp, { leistung: number; spannung: number }> = {
-  licht: { leistung: 100, spannung: 230 },
-  steckdose: { leistung: 3680, spannung: 230 },
-  herd: { leistung: 11000, spannung: 400 },
-  backofen: { leistung: 3500, spannung: 230 },
-  trockner: { leistung: 2500, spannung: 230 },
-  warmwasser: { leistung: 2000, spannung: 230 },
-  heizung: { leistung: 2000, spannung: 230 },
-  klimaanlage: { leistung: 3000, spannung: 230 },
-  wallbox: { leistung: 11000, spannung: 400 },
-  sonstige: { leistung: 1000, spannung: 230 },
+export const VERBRAUCHER_DEFAULTS: Record<VerbraucherTyp, { leistung: number; spannung: number; cosPhi: number }> = {
+  licht: { leistung: 100, spannung: 230, cosPhi: 0.9 },
+  steckdose: { leistung: 3680, spannung: 230, cosPhi: 1.0 },
+  herd: { leistung: 11000, spannung: 400, cosPhi: 1.0 },
+  backofen: { leistung: 3500, spannung: 230, cosPhi: 1.0 },
+  trockner: { leistung: 2500, spannung: 230, cosPhi: 0.95 },
+  warmwasser: { leistung: 2000, spannung: 230, cosPhi: 1.0 },
+  heizung: { leistung: 2000, spannung: 230, cosPhi: 1.0 },
+  klimaanlage: { leistung: 3000, spannung: 230, cosPhi: 0.85 },
+  wallbox: { leistung: 11000, spannung: 400, cosPhi: 0.99 },
+  sonstige: { leistung: 1000, spannung: 230, cosPhi: 0.9 },
 };
 
 // Verfügbare Leitungsquerschnitte in mm² (gemäß ÖVE)
@@ -290,6 +291,7 @@ export interface Wire {
   material: 'Cu' | 'Al';
   strom?: number;               // Berechneter Maximalstrom [A] - wird bei Validierung gesetzt
   durchpihnittsstrom?: number;   // Berechneter Durchschnittsstrom mit GZF [A]
+  stromWinkel?: number;          // Winkel des Stromphasors in Grad (nur für N-Drähte relevant)
 }
 
 // ==========================================

@@ -27,10 +27,58 @@ import type {
   ElektroComponent,
   Wire,
   Phase,
+  Verbraucher,
   FISchalterParams,
   FILSKombiParams,
   LSSchalterParams,
 } from '../types';
+
+// ==========================================
+// PHASOR-ARITHMETIK
+// ==========================================
+
+export interface Phasor {
+  real: number;
+  imag: number;
+}
+
+export function phasorFromPolar(magnitude: number, angleDeg: number): Phasor {
+  const rad = angleDeg * Math.PI / 180;
+  return { real: magnitude * Math.cos(rad), imag: magnitude * Math.sin(rad) };
+}
+
+export function phasorAdd(a: Phasor, b: Phasor): Phasor {
+  return { real: a.real + b.real, imag: a.imag + b.imag };
+}
+
+export function phasorMagnitude(p: Phasor): number {
+  return Math.sqrt(p.real * p.real + p.imag * p.imag);
+}
+
+export function phasorAngleDeg(p: Phasor): number {
+  return Math.atan2(p.imag, p.real) * 180 / Math.PI;
+}
+
+/** Phasen-Referenzwinkel für den Spannungsvektor */
+function phaseAngleDeg(phase: Phase): number {
+  if (phase === 'L1') return 0;
+  if (phase === 'L2') return -120;
+  if (phase === 'L3') return 120; // -240° = +120°
+  return 0;
+}
+
+/**
+ * Berechnet den Strom-Phasor eines Verbrauchers auf einer bestimmten Phase.
+ * Der Rückstrom im N hat denselben Betrag und Winkel (θ - φ).
+ * cosPhi: Leistungsfaktor (induktiv: Strom eilt nach)
+ */
+function verbraucherNPhasor(stromBetrag: number, phase: Phase, cosPhi: number): Phasor {
+  const theta = phaseAngleDeg(phase);
+  const phi = Math.acos(Math.min(1, Math.max(0, cosPhi))); // in Rad
+  const phiDeg = phi * 180 / Math.PI;
+  // Strom-Phasor: Betrag |I|, Winkel (θ - φ) — induktiv nacheilend
+  return phasorFromPolar(stromBetrag, theta - phiDeg);
+}
 
 // ==========================================
 // TYPEN FÜR DIE GRAPHEN-ANALYSE
@@ -1866,8 +1914,9 @@ export function detectPhaseForComponent(
  *
  * PE-Drähte bekommen keinen Strom (theoretisch 0).
  */
-export function calculateWireCurrents(verteiler: Verteiler): Map<string, number> {
+export function calculateWireCurrents(verteiler: Verteiler): { currents: Map<string, number>; angles: Map<string, number> } {
   const wireCurrents = new Map<string, number>();
+  const wireAngles = new Map<string, number>();
 
   // Initialisiere alle Drähte mit 0
   for (const wire of verteiler.verbindungen) {
@@ -1879,7 +1928,10 @@ export function calculateWireCurrents(verteiler: Verteiler): Map<string, number>
 
   // Finde die Versorgungsklemme
   const versorgung = verteiler.komponenten.find(k => k.type === 'versorgungsklemme');
-  if (!versorgung) return wireCurrents;
+  if (!versorgung) return { currents: wireCurrents, angles: wireAngles };
+
+  // N-Draht-Phasoren: wireId → Phasor (echte Phasor-Addition mit cos φ)
+  const nWirePhasors = new Map<string, Phasor>();
 
   // Für jeden Verbraucher: Berechne Strom und finde Pfad zur Versorgung
   for (const verbraucher of verteiler.verbraucher) {
@@ -1888,17 +1940,18 @@ export function calculateWireCurrents(verteiler: Verteiler): Map<string, number>
     // Verwende erkannte Phasen statt manueller Zuweisung
     const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
     const phasenAnzahl = effectivePhasen.length;
+    const cosPhi = verbraucher.cosPhi ?? 1.0;
 
-    // Berechne Strom des Verbrauchers
+    // Berechne Scheinstrom des Verbrauchers (I = P / (U · cosφ))
     const leistung = verbraucher.leistung; // Watt
 
     let strom: number;
     if (phasenAnzahl === 3) {
-      // Dreiphasig: I = P / (√3 × 400V)
-      strom = leistung / (Math.sqrt(3) * 400);
+      // Dreiphasig: I = P / (√3 × 400V × cosφ)
+      strom = leistung / (Math.sqrt(3) * 400 * cosPhi);
     } else {
-      // Einphasig: I = P / 230V
-      strom = leistung / 230;
+      // Einphasig: I = P / (230V × cosφ)
+      strom = leistung / (230 * cosPhi);
     }
 
     // Finde die zugewiesene Abgangsklemme
@@ -1906,12 +1959,8 @@ export function calculateWireCurrents(verteiler: Verteiler): Map<string, number>
     if (!abgangsklemme || abgangsklemme.type !== 'abgangsklemme') continue;
 
     // Für jede Phase des Verbrauchers: Finde den Pfad zur Versorgung
-    const verbraucherPhasen = effectivePhasen;
-
-    for (const phase of verbraucherPhasen) {
-      // Bei dreiphasig: Strom pro Phase ist I/3 (gleichmäßig verteilt)
-      // Bei einphasig: voller Strom auf dieser Phase
-      const stromProPhase = phasenAnzahl === 3 ? strom : strom;
+    for (const phase of effectivePhasen) {
+      const stromProPhase = strom;
 
       // Startpunkt: IN_<phase> der Abgangsklemme
       // WICHTIG: Bei einphasigen Verbrauchern (auf L2 oder L3) hat die 3-polige Abgangsklemme
@@ -1936,9 +1985,81 @@ export function calculateWireCurrents(verteiler: Verteiler): Map<string, number>
         wireCurrents.set(wireId, currentStrom + stromProPhase);
       }
     }
+
+    // N-Draht-Ströme berechnen: Phasor-Addition mit cos φ
+    const nStartTerminalId = getTerminalId(abgangsklemme.id, 'IN_N');
+    const nWiresOnPath = findWiresOnPathToVersorgung(
+      verteiler,
+      adjacency,
+      nStartTerminalId,
+      versorgung.id,
+      'N'
+    );
+
+    if (nWiresOnPath.length > 0) {
+      for (const wireId of nWiresOnPath) {
+        if (!nWirePhasors.has(wireId)) {
+          nWirePhasors.set(wireId, { real: 0, imag: 0 });
+        }
+        const currentPhasor = nWirePhasors.get(wireId)!;
+
+        if (phasenAnzahl === 3) {
+          // Dreiphasig: Phasor-Beitrag auf jeder Phase addieren
+          for (const phase of ['L1', 'L2', 'L3'] as Phase[]) {
+            const p = verbraucherNPhasor(strom, phase, cosPhi);
+            currentPhasor.real += p.real;
+            currentPhasor.imag += p.imag;
+          }
+        } else {
+          // Einphasig: Phasor auf der erkannten Phase
+          const phase = effectivePhasen[0];
+          if (phase === 'L1' || phase === 'L2' || phase === 'L3') {
+            const p = verbraucherNPhasor(strom, phase, cosPhi);
+            currentPhasor.real += p.real;
+            currentPhasor.imag += p.imag;
+          }
+        }
+      }
+    }
   }
 
-  return wireCurrents;
+  // N-Drähte: Phasor-Ergebnis in Betrag und Winkel umrechnen
+  for (const [wireId, phasor] of nWirePhasors) {
+    wireCurrents.set(wireId, phasorMagnitude(phasor));
+    wireAngles.set(wireId, phasorAngleDeg(phasor));
+  }
+
+  return { currents: wireCurrents, angles: wireAngles };
+}
+
+/**
+ * Berechnet den Neutralleiterstrom aus den Außenleiterströmen.
+ * Vereinfachte Formel bei cos φ = 1 (nur Beträge, 120°-Versatz angenommen).
+ * Für exakte Berechnung mit unterschiedlichem cos φ: berechneNeutralleiterStromPhasor() verwenden.
+ *
+ * I_N = √(I_L1² + I_L2² + I_L3² - I_L1·I_L2 - I_L2·I_L3 - I_L1·I_L3)
+ */
+export function berechneNeutralleiterStrom(iL1: number, iL2: number, iL3: number): number {
+  const summe = iL1 * iL1 + iL2 * iL2 + iL3 * iL3
+    - iL1 * iL2 - iL2 * iL3 - iL1 * iL3;
+  return Math.sqrt(Math.max(0, summe));
+}
+
+/**
+ * Berechnet den Neutralleiterstrom-Phasor aus einer Liste von Verbrauchern.
+ * Berücksichtigt individuellen cos φ jedes Verbrauchers.
+ * Gibt den resultierenden Phasor (Betrag + Winkel) zurück.
+ */
+export function berechneNeutralleiterStromPhasor(
+  verbraucherDaten: Array<{ strom: number; phase: Phase; cosPhi: number }>
+): Phasor {
+  let result: Phasor = { real: 0, imag: 0 };
+  for (const { strom, phase, cosPhi } of verbraucherDaten) {
+    if (phase === 'N' || phase === 'PE') continue;
+    const p = verbraucherNPhasor(strom, phase, cosPhi);
+    result = phasorAdd(result, p);
+  }
+  return result;
 }
 
 /**
@@ -2028,8 +2149,9 @@ function findWireBetweenTerminals(
  * Der Gleichzeitigkeitsfaktor (GZF) jedes Verbrauchers wird berücksichtigt.
  * Formel: Durchschnittsstrom = Maximalstrom × GZF
  */
-export function calculateWireAverageCurrents(verteiler: Verteiler): Map<string, number> {
+export function calculateWireAverageCurrents(verteiler: Verteiler): { currents: Map<string, number>; angles: Map<string, number> } {
   const wireCurrents = new Map<string, number>();
+  const wireAngles = new Map<string, number>();
 
   // Initialisiere alle Drähte mit 0
   for (const wire of verteiler.verbindungen) {
@@ -2041,7 +2163,10 @@ export function calculateWireAverageCurrents(verteiler: Verteiler): Map<string, 
 
   // Finde die Versorgungsklemme
   const versorgung = verteiler.komponenten.find(k => k.type === 'versorgungsklemme');
-  if (!versorgung) return wireCurrents;
+  if (!versorgung) return { currents: wireCurrents, angles: wireAngles };
+
+  // N-Draht-Phasoren für Durchschnittsströme
+  const nWirePhasors = new Map<string, Phasor>();
 
   // Für jeden Verbraucher: Berechne Strom mit GZF und finde Pfad zur Versorgung
   for (const verbraucher of verteiler.verbraucher) {
@@ -2050,18 +2175,17 @@ export function calculateWireAverageCurrents(verteiler: Verteiler): Map<string, 
     // Verwende erkannte Phasen statt manueller Zuweisung
     const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
     const phasenAnzahl = effectivePhasen.length;
+    const cosPhi = verbraucher.cosPhi ?? 1.0;
 
-    // Berechne Strom des Verbrauchers
+    // Berechne Scheinstrom des Verbrauchers
     const leistung = verbraucher.leistung; // Watt
     const gzf = verbraucher.gleichzeitigkeitsfaktor || 1; // GZF (Standard: 1)
 
     let strom: number;
     if (phasenAnzahl === 3) {
-      // Dreiphasig: I = P / (√3 × 400V)
-      strom = leistung / (Math.sqrt(3) * 400);
+      strom = leistung / (Math.sqrt(3) * 400 * cosPhi);
     } else {
-      // Einphasig: I = P / 230V
-      strom = leistung / 230;
+      strom = leistung / (230 * cosPhi);
     }
 
     // Durchschnittsstrom = Maximalstrom × GZF
@@ -2071,11 +2195,8 @@ export function calculateWireAverageCurrents(verteiler: Verteiler): Map<string, 
     const abgangsklemme = verteiler.komponenten.find(k => k.id === verbraucher.zugewieseneKomponente);
     if (!abgangsklemme || abgangsklemme.type !== 'abgangsklemme') continue;
 
-    // Für jede Phase des Verbrauchers: Finde den Pfad zur Versorgung
-    const verbraucherPhasen = effectivePhasen;
-
-    for (const phase of verbraucherPhasen) {
-      const stromProPhase = phasenAnzahl === 3 ? durchschnittsstrom : durchschnittsstrom;
+    for (const phase of effectivePhasen) {
+      const stromProPhase = durchschnittsstrom;
 
       // WICHTIG: Bei einphasigen Verbrauchern (auf L2 oder L3) hat die 3-polige Abgangsklemme
       // nur ein IN_L1 Terminal. Die erkannte Phase (L2/L3) bezieht sich auf die Versorgung.
@@ -2095,9 +2216,49 @@ export function calculateWireAverageCurrents(verteiler: Verteiler): Map<string, 
         wireCurrents.set(wireId, currentStrom + stromProPhase);
       }
     }
+
+    // N-Draht-Durchschnittsströme: Phasor-Addition mit cos φ
+    const nStartTerminalId = getTerminalId(abgangsklemme.id, 'IN_N');
+    const nWiresOnPath = findWiresOnPathToVersorgung(
+      verteiler,
+      adjacency,
+      nStartTerminalId,
+      versorgung.id,
+      'N'
+    );
+
+    if (nWiresOnPath.length > 0) {
+      for (const wireId of nWiresOnPath) {
+        if (!nWirePhasors.has(wireId)) {
+          nWirePhasors.set(wireId, { real: 0, imag: 0 });
+        }
+        const currentPhasor = nWirePhasors.get(wireId)!;
+
+        if (phasenAnzahl === 3) {
+          for (const phase of ['L1', 'L2', 'L3'] as Phase[]) {
+            const p = verbraucherNPhasor(durchschnittsstrom, phase, cosPhi);
+            currentPhasor.real += p.real;
+            currentPhasor.imag += p.imag;
+          }
+        } else {
+          const phase = effectivePhasen[0];
+          if (phase === 'L1' || phase === 'L2' || phase === 'L3') {
+            const p = verbraucherNPhasor(durchschnittsstrom, phase, cosPhi);
+            currentPhasor.real += p.real;
+            currentPhasor.imag += p.imag;
+          }
+        }
+      }
+    }
   }
 
-  return wireCurrents;
+  // N-Drähte: Phasor-Ergebnis in Betrag und Winkel umrechnen
+  for (const [wireId, phasor] of nWirePhasors) {
+    wireCurrents.set(wireId, phasorMagnitude(phasor));
+    wireAngles.set(wireId, phasorAngleDeg(phasor));
+  }
+
+  return { currents: wireCurrents, angles: wireAngles };
 }
 
 /**
@@ -2105,21 +2266,23 @@ export function calculateWireAverageCurrents(verteiler: Verteiler): Map<string, 
  * Gibt den aktualisierten Verteiler zurück.
  */
 export function updateWireCurrentsInVerteiler(verteiler: Verteiler): Verteiler {
-  const wireCurrents = calculateWireCurrents(verteiler);
-  const wireAverageCurrents = calculateWireAverageCurrents(verteiler);
+  const { currents: wireCurrents, angles: wireAngles } = calculateWireCurrents(verteiler);
+  const { currents: wireAverageCurrents } = calculateWireAverageCurrents(verteiler);
 
   const updatedVerbindungen = verteiler.verbindungen.map(wire => {
     // PE-Drähte bekommen keinen Strom
     if (wire.phase === 'PE') {
-      return { ...wire, strom: 0, durchpihnittsstrom: 0 };
+      return { ...wire, strom: 0, durchpihnittsstrom: 0, stromWinkel: undefined };
     }
 
     const strom = wireCurrents.get(wire.id) || 0;
     const durchpihnittsstrom = wireAverageCurrents.get(wire.id) || 0;
+    const winkel = wireAngles.get(wire.id);
     return {
       ...wire,
       strom: Math.round(strom * 100) / 100,
-      durchpihnittsstrom: Math.round(durchpihnittsstrom * 100) / 100
+      durchpihnittsstrom: Math.round(durchpihnittsstrom * 100) / 100,
+      stromWinkel: winkel !== undefined ? Math.round(winkel * 10) / 10 : undefined,
     };
   });
 

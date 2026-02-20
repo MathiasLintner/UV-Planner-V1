@@ -27,6 +27,9 @@ import {
   checkDrehfeldForComponent,
   analyzeSelectivity,
   getEffectivePhasen,
+  berechneNeutralleiterStrom,
+  phasorMagnitude,
+  type Phasor,
   type CircuitPath,
   type SelectivityViolation,
 } from './circuitGraph';
@@ -625,6 +628,37 @@ function checkPhasensymmetrie(verteiler: Verteiler): ValidationError[] {
         phasenLasten[phase] += lastProPhase;
       }
     }
+  }
+
+  // N-Strom berechnen: Phasor-Addition mit individuellem cos φ
+  {
+    let nPhasor: Phasor = { real: 0, imag: 0 };
+    for (const verbraucher of verteiler.verbraucher) {
+      const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
+      const cosPhi = verbraucher.cosPhi ?? 1.0;
+      const phi = Math.acos(Math.min(1, Math.max(0, cosPhi)));
+      const phasenAnzahl = effectivePhasen.length;
+      const leistung = verbraucher.leistung * verbraucher.gleichzeitigkeitsfaktor;
+
+      if (phasenAnzahl === 3) {
+        const strom = leistung / (Math.sqrt(3) * 400 * cosPhi);
+        for (const phase of ['L1', 'L2', 'L3'] as Phase[]) {
+          const theta = phase === 'L1' ? 0 : phase === 'L2' ? -120 : 120;
+          const thetaRad = theta * Math.PI / 180;
+          nPhasor.real += strom * Math.cos(thetaRad - phi);
+          nPhasor.imag += strom * Math.sin(thetaRad - phi);
+        }
+      } else {
+        const strom = leistung / (230 * cosPhi);
+        const phase = effectivePhasen[0];
+        const theta = phase === 'L1' ? 0 : phase === 'L2' ? -120 : 120;
+        const thetaRad = theta * Math.PI / 180;
+        nPhasor.real += strom * Math.cos(thetaRad - phi);
+        nPhasor.imag += strom * Math.sin(thetaRad - phi);
+      }
+    }
+    const nStrom = phasorMagnitude(nPhasor);
+    phasenLasten.N = nStrom * 230;
   }
 
   // Prüfe Symmetrie (nur L1, L2, L3)
@@ -1487,6 +1521,37 @@ function berechneGesamtwerte(verteiler: Verteiler): ValidationResult['berechnung
         phasenLasten[phase] += lastProPhase;
       }
     }
+  }
+
+  // N-Strom berechnen: Phasor-Addition mit individuellem cos φ
+  {
+    let nPhasor: Phasor = { real: 0, imag: 0 };
+    for (const verbraucher of verteiler.verbraucher) {
+      const effectivePhasen = getEffectivePhasen(verteiler, verbraucher);
+      const cosPhi = verbraucher.cosPhi ?? 1.0;
+      const phi = Math.acos(Math.min(1, Math.max(0, cosPhi)));
+      const phasenAnzahl = effectivePhasen.length;
+      const leistung = verbraucher.leistung * verbraucher.gleichzeitigkeitsfaktor;
+
+      if (phasenAnzahl === 3) {
+        const strom = leistung / (Math.sqrt(3) * 400 * cosPhi);
+        for (const phase of ['L1', 'L2', 'L3'] as Phase[]) {
+          const theta = phase === 'L1' ? 0 : phase === 'L2' ? -120 : 120;
+          const thetaRad = theta * Math.PI / 180;
+          nPhasor.real += strom * Math.cos(thetaRad - phi);
+          nPhasor.imag += strom * Math.sin(thetaRad - phi);
+        }
+      } else {
+        const strom = leistung / (230 * cosPhi);
+        const phase = effectivePhasen[0];
+        const theta = phase === 'L1' ? 0 : phase === 'L2' ? -120 : 120;
+        const thetaRad = theta * Math.PI / 180;
+        nPhasor.real += strom * Math.cos(thetaRad - phi);
+        nPhasor.imag += strom * Math.sin(thetaRad - phi);
+      }
+    }
+    const nStrom = phasorMagnitude(nPhasor);
+    phasenLasten.N = nStrom * 230; // Zurück in Watt für Konsistenz
   }
 
   // Maximaler Spannungsfall (vereinfacht)

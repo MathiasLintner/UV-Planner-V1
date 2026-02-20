@@ -27,6 +27,7 @@ export const VerbraucherPanel: React.FC = () => {
     name: '',
     phasen: ['L1'],
     gleichzeitigkeitsfaktor: 1,
+    cosPhi: 1.0,
     leitungslaenge: 20,
     leitungsquerschnitt: 2.5,
     verlegeart: 'B1',
@@ -45,6 +46,7 @@ export const VerbraucherPanel: React.FC = () => {
       spannung: newVerbraucher.spannung || defaults.spannung,
       phasen: newVerbraucher.phasen as Phase[],
       gleichzeitigkeitsfaktor: newVerbraucher.gleichzeitigkeitsfaktor || 1,
+      cosPhi: newVerbraucher.cosPhi ?? defaults.cosPhi,
       leitungslaenge: newVerbraucher.leitungslaenge || 20,
       leitungsquerschnitt: newVerbraucher.leitungsquerschnitt || 2.5,
       verlegeart: newVerbraucher.verlegeart as Verlegeart || 'B1',
@@ -58,6 +60,7 @@ export const VerbraucherPanel: React.FC = () => {
       name: '',
       phasen: ['L1'],
       gleichzeitigkeitsfaktor: 1,
+      cosPhi: 1.0,
       leitungslaenge: 20,
       leitungsquerschnitt: 2.5,
       verlegeart: 'B1',
@@ -73,6 +76,7 @@ export const VerbraucherPanel: React.FC = () => {
       typ,
       leistung: defaults.leistung,
       spannung: defaults.spannung,
+      cosPhi: defaults.cosPhi,
       phasen: defaults.spannung === 400 ? ['L1', 'L2', 'L3'] : ['L1'],
     });
   };
@@ -182,7 +186,7 @@ export const VerbraucherPanel: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="block text-xs text-gray-500 mb-1">GZF</label>
               <input
@@ -192,6 +196,18 @@ export const VerbraucherPanel: React.FC = () => {
                 step="0.1"
                 value={newVerbraucher.gleichzeitigkeitsfaktor}
                 onChange={(e) => setNewVerbraucher({ ...newVerbraucher, gleichzeitigkeitsfaktor: Number(e.target.value) })}
+                className="w-full px-2 py-1.5 border rounded text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">cos φ</label>
+              <input
+                type="number"
+                min="0.1"
+                max="1"
+                step="0.01"
+                value={newVerbraucher.cosPhi ?? 1.0}
+                onChange={(e) => setNewVerbraucher({ ...newVerbraucher, cosPhi: Number(e.target.value) })}
                 className="w-full px-2 py-1.5 border rounded text-sm"
               />
             </div>
@@ -416,6 +432,8 @@ const VerbraucherItem: React.FC<{ verbraucher: Verbraucher }> = ({ verbraucher }
             )}
             <span>•</span>
             <span>GZF: {verbraucher.gleichzeitigkeitsfaktor}</span>
+            <span>•</span>
+            <span>cos φ: {(verbraucher.cosPhi ?? 1.0).toFixed(2)}</span>
           </div>
           {(verbraucher.leitungslaenge || verbraucher.leitungsquerschnitt || verbraucher.verlegeart || verbraucher.leitermaterial) && (
             <div className="text-xs text-blue-600">
@@ -501,7 +519,19 @@ const VerbraucherItem: React.FC<{ verbraucher: Verbraucher }> = ({ verbraucher }
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">cos φ</label>
+              <input
+                type="number"
+                min="0.1"
+                max="1"
+                step="0.01"
+                value={verbraucher.cosPhi ?? 1.0}
+                onChange={(e) => updateVerbraucher(verbraucher.id, { cosPhi: Number(e.target.value) })}
+                className="w-full px-2 py-1 border rounded text-sm"
+              />
+            </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">Leitungslänge (m)</label>
               <input

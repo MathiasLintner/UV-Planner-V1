@@ -16,7 +16,10 @@
       "Bash(node test-ueberstrom.js:*)",
       "Bash(node test-stromberechnung.js:*)",
       "Bash(node test-drehfeldcheck.js:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(echo:*)",
+      "Bash(npx vite build)"
     ],
     "deny": [
       "Node_modules",
